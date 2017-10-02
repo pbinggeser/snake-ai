@@ -1,0 +1,25 @@
+{
+  "name": "snake-ai",
+  "version": "0.1.0",
+  "private": true,
+  "homepage": "https://pbinggeser.github.io/snake-ai/",
+  "dependencies": {
+    "d3": "^4.9.1",
+    "neataptic": "^1.2.6",
+    "react": "^15.5.4",
+    "react-dom": "^15.5.4"
+  },
+  "devDependencies": {
+    "create-react-app-sass": "^1.1.0",
+    "gh-pages": "^1.0.0",
+    "react-scripts": "1.0.5"
+  },
+  "scripts": {
+    "start": "react-scripts-with-sass start",
+    "build": "react-scripts-with-sass build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
+  }
+}

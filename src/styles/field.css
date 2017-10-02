@@ -1,0 +1,80 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  text-align: left;
+  margin-top: 10px;
+  margin-bottom: 10px; }
+  .field .field-label {
+    opacity: 1;
+    transition: opacity 200ms ease-in-out;
+    text-transform: capitalize;
+    font-weight: 300; }
+    .field .field-label.field-label-hidden {
+      opacity: 0; }
+  .field .field-error {
+    height: 12px;
+    font-size: 12px;
+    text-align: right;
+    color: #c9302c; }
+  .field .field-description {
+    height: 12px;
+    font-size: 12px;
+    text-align: right;
+    color: #929BAA; }
+  .field textarea {
+    resize: none;
+    padding-top: 6px;
+    min-height: 42px; }
+  .field .input {
+    margin-top: 2px;
+    margin-bottom: 2px;
+    padding: 8px;
+    font-size: 16px;
+    height: auto;
+    border-radius: 3px;
+    border: 2px solid #929BAA;
+    overflow: hidden; }
+    .field .input.input-jumbo {
+      font-size: 50px;
+      border: none;
+      font-weight: 700;
+      background: none; }
+      .field .input.input-jumbo::-webkit-input-placeholder {
+        /* Chrome/Opera/Safari */
+        color: #000;
+        opacity: .5; }
+      .field .input.input-jumbo::-moz-placeholder {
+        /* Firefox 19+ */
+        color: #000;
+        opacity: .5; }
+      .field .input.input-jumbo:-ms-input-placeholder {
+        /* IE 10+ */
+        color: #000;
+        opacity: .5; }
+      .field .input.input-jumbo:-moz-placeholder {
+        /* Firefox 18- */
+        color: #000;
+        opacity: .5; }
+    .field .input.input-error {
+      border-color: #c9302c; }
+    .field .input:disabled {
+      pointer-events: none;
+      opacity: .5; }
+    .field .input:focus {
+      outline: none;
+      border-color: #3aa3e3; }
+      .field .input:focus.input-error {
+        border-color: #c9302c; }
+    .field .input::-webkit-input-placeholder {
+      /* Chrome/Opera/Safari */
+      color: #C0C7D3; }
+    .field .input::-moz-placeholder {
+      /* Firefox 19+ */
+      color: #C0C7D3; }
+    .field .input:-ms-input-placeholder {
+      /* IE 10+ */
+      color: #C0C7D3; }
+    .field .input:-moz-placeholder {
+      /* Firefox 18- */
+      color: #C0C7D3; }

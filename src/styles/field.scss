@@ -1,0 +1,123 @@
+// field.scss
+
+@import 'vars.scss';
+
+.field{
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  text-align: left;
+  margin-top: 10px;
+  margin-bottom: 10px;
+
+  .field-label{
+    opacity: 1;
+    transition: opacity 200ms ease-in-out;
+    text-transform: capitalize;
+    font-weight: 300;
+
+    &.field-label-hidden{
+      opacity: 0;
+    }
+  }
+
+  .field-error{
+    height: 12px;
+    font-size: 12px;
+    text-align: right;
+    color: $danger;
+  }
+  .field-description{
+    height: 12px;
+    font-size: 12px;
+    text-align: right;
+    color: $grey;
+  }
+
+  textarea{
+    resize: none;
+    padding-top: 6px;
+    min-height: 42px;
+
+  }
+
+  .input{
+
+    // width: 100%;
+    // margin-right: 10px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+    padding: 8px;
+    // padding-left: 0px;
+    // padding-top: 0px;
+    font-size: 16px;
+    height: auto;
+    border-radius: 3px;
+    // border: none;
+    border: 2px solid $grey;
+    overflow: hidden;
+
+    &.input-jumbo{
+      font-size: 50px;
+      border: none;
+      font-weight: 700;
+      background: none;
+      &::-webkit-input-placeholder { /* Chrome/Opera/Safari */
+        color: #000;
+        opacity: .5;
+        // font-weight: 300;
+      }
+      &::-moz-placeholder { /* Firefox 19+ */
+        color: #000;
+        opacity: .5;
+        // font-weight: 300;
+      }
+      &:-ms-input-placeholder { /* IE 10+ */
+        color: #000;
+        opacity: .5;
+        // font-weight: 300;
+      }
+      &:-moz-placeholder { /* Firefox 18- */
+        color: #000;
+        opacity: .5;
+        // font-weight: 300;
+      }
+    }
+
+    &.input-error{
+      border-color: $danger;
+
+
+    }
+
+    &:disabled{
+      pointer-events: none;
+      opacity: .5;
+    }
+
+    &:focus{
+      outline: none;
+      border-color: $primary;    
+      &.input-error{
+        border-color: $danger;
+      }
+    }
+
+    &::-webkit-input-placeholder { /* Chrome/Opera/Safari */
+      color: $medium-grey;
+      // font-weight: 300;
+    }
+    &::-moz-placeholder { /* Firefox 19+ */
+      color: $medium-grey;
+      // font-weight: 300;
+    }
+    &:-ms-input-placeholder { /* IE 10+ */
+      color: $medium-grey;
+      // font-weight: 300;
+    }
+    &:-moz-placeholder { /* Firefox 18- */
+      color: $medium-grey;
+      // font-weight: 300;
+    }
+  }
+}

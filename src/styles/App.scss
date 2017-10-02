@@ -1,0 +1,115 @@
+// App.scss
+@import 'vars.scss';
+
+html,body,#root, #root>div{
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: #fff;
+  color: #111;
+  font-family: 'Lato', sans-serif;
+  font-size: 14px;
+}
+
+.App{
+  display: flex;
+  justify-content: space-between;
+  align-items: stretch;
+}
+
+.grid-item{
+  border: 2px solid #E1E4EA;
+  margin-top: -3px;
+  margin-right: -2px;
+  display: inline-block;
+  background: #fff;
+}
+
+.control-menu{
+  width: 300px;
+  min-width: 300px;
+  background: #E1E4EA;
+  padding: 10px;
+  overflow-y: auto;
+}
+
+.description{
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.text-thin{
+  font-weight: 300;
+}
+
+.translucent{
+  opacity: .5;
+}
+
+#workspace{
+  margin-bottom: 20px;
+}
+
+hr{
+  border: none;
+  border-bottom: 1px solid #ddd;
+}
+
+.text-primary{
+  color: #24C25B;
+}
+
+#graph{
+  display: block;
+  height: 300px;
+}
+
+.btn{
+  text-align: center;
+  padding: 10px;
+  display: block;
+  background: $dark;
+  color: $white;
+  cursor: pointer;
+  user-select: none;
+  margin-bottom: 5px;
+
+  &.btn-disabled{
+    opacity: .5;
+    pointer-events: none;
+  }
+
+  &.btn-success{
+    background: $success;
+    color: $white;
+    &:hover{
+      background: darken($success, 10%);
+    }
+    &:active{
+      background: darken($success, 20%);
+    }
+  }
+
+  &.btn-orange{
+    background: $orange;
+    color: $white;  
+    &:hover{
+      background: darken($orange, 10%);
+    }
+    &:active{
+      background: darken($orange, 20%);
+    }  
+  }
+
+  &.btn-danger{
+    background: $danger;
+    color: $white;  
+    &:hover{
+      background: darken($danger, 10%);
+    }
+    &:active{
+      background: darken($danger, 20%);
+    }  
+  }
+}

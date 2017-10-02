@@ -1,0 +1,86 @@
+html, body, #root, #root > div {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: #fff;
+  color: #111;
+  font-family: 'Lato', sans-serif;
+  font-size: 14px; }
+
+.App {
+  display: flex;
+  justify-content: space-between;
+  align-items: stretch; }
+
+.grid-item {
+  border: 2px solid #E1E4EA;
+  margin-top: -3px;
+  margin-right: -2px;
+  display: inline-block;
+  background: #fff; }
+
+.control-menu {
+  width: 300px;
+  min-width: 300px;
+  background: #E1E4EA;
+  padding: 10px;
+  overflow-y: auto; }
+
+.description {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 20px; }
+
+.text-thin {
+  font-weight: 300; }
+
+.translucent {
+  opacity: .5; }
+
+#workspace {
+  margin-bottom: 20px; }
+
+hr {
+  border: none;
+  border-bottom: 1px solid #ddd; }
+
+.text-primary {
+  color: #24C25B; }
+
+#graph {
+  display: block;
+  height: 300px; }
+
+.btn {
+  text-align: center;
+  padding: 10px;
+  display: block;
+  background: #141B1F;
+  color: #fff;
+  cursor: pointer;
+  user-select: none;
+  margin-bottom: 5px; }
+  .btn.btn-disabled {
+    opacity: .5;
+    pointer-events: none; }
+  .btn.btn-success {
+    background: #32C094;
+    color: #fff; }
+    .btn.btn-success:hover {
+      background: #279875; }
+    .btn.btn-success:active {
+      background: #1d6f56; }
+  .btn.btn-orange {
+    background: #DFA01E;
+    color: #fff; }
+    .btn.btn-orange:hover {
+      background: #b28018; }
+    .btn.btn-orange:active {
+      background: #855f12; }
+  .btn.btn-danger {
+    background: #c9302c;
+    color: #fff; }
+    .btn.btn-danger:hover {
+      background: #9f2623; }
+    .btn.btn-danger:active {
+      background: #751c1a; }

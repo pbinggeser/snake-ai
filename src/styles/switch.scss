@@ -1,0 +1,36 @@
+@import 'vars.scss';
+
+.switch{
+  display: flex;
+  justify-content: space-between;
+  // padding-bottom: 5px;
+  padding-top: 5px;  
+  // margin-top: 10px;
+  font-size: 12px;
+
+  .switch-label{
+
+  }
+
+  .fa{
+    cursor: pointer;
+    font-size: 22px;
+    user-select: none;
+    // position: relative;
+    // top: 3px;
+    // padding-right: 5px;
+    // padding-left: 5px;
+    &:hover{
+      color: $dark-grey;
+    }
+  }
+
+  &.disabled{
+    cursor: auto;
+  }
+
+  color: $grey;
+  .fa-toggle-on{
+    color: $success;
+  }
+}
