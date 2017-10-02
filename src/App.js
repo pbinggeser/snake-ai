@@ -196,7 +196,7 @@ class App extends Component {
             required={true}
             value={this.state.displaySize}
             onChangeEvent={(v)=> { that.setState({ displaySize: v })}}
-            description="Does not effect game-play."
+            description="Does not affect game-play."
             min={10}
             step={1}
           />
@@ -255,7 +255,7 @@ class App extends Component {
               This graph shows a dot for every individual neural net's performance. Each new generation will appear at to the right.
             </p>
             <p>
-              <small><strong>Be patient.</strong> Sometimes, advantagous random mutations happen quickly, sometimes those mutations prove it's better to play it safe, and sometimes they never seem to happen...</small>
+              <small><strong>Be patient.</strong> Sometimes, advantageous random mutations happen quickly, sometimes those mutations prove it's better to play it safe, and sometimes they never seem to happen...</small>
             </p>
             <small><i><strong>Warning: Some browsers slow down the loops being used to train the AI if this tab is in the background. Funky things may happen.</strong></i></small>
           </div>
