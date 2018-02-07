@@ -5,8 +5,9 @@ var d3 = require('d3');
 
 /** Rename vars */
 var Neat    = neataptic.Neat;
-var Methods = neataptic.Methods;
-var Architect = neataptic.Architect;
+//refer to https://github.com/wagenaartje/neataptic/issues/104
+var Methods = neataptic.methods;
+var Architect = neataptic.architect;
 
 // Global vars
 var neat;
@@ -31,15 +32,14 @@ function Manager(){
 }
 
 Manager.prototype = {
+  sleep: function(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  },
   start: function(){
-    // this.config = newConfig;
-
     snakes = [];
     generationLog = [];
     generationTimeLog = [];
     iterationCounter = 0;
-
-    neat = undefined;
     /** Construct the genetic algorithm */  
     neat = new Neat(
       inputSize,
@@ -47,19 +47,19 @@ Manager.prototype = {
       null,
       {
         mutation: [
-          Methods.Mutation.ADD_NODE,
-          Methods.Mutation.SUB_NODE,
-          Methods.Mutation.ADD_CONN,
-          Methods.Mutation.SUB_CONN,
-          Methods.Mutation.MOD_WEIGHT,
-          Methods.Mutation.MOD_BIAS,
-          Methods.Mutation.MOD_ACTIVATION,
-          Methods.Mutation.ADD_GATE,
-          Methods.Mutation.SUB_GATE,
-          Methods.Mutation.ADD_SELF_CONN,
-          Methods.Mutation.SUB_SELF_CONN,
-          Methods.Mutation.ADD_BACK_CONN,
-          Methods.Mutation.SUB_BACK_CONN
+          Methods.mutation.ADD_NODE,
+          Methods.mutation.SUB_NODE,
+          Methods.mutation.ADD_CONN,
+          Methods.mutation.SUB_CONN,
+          Methods.mutation.MOD_WEIGHT,
+          Methods.mutation.MOD_BIAS,
+          Methods.mutation.MOD_ACTIVATION,
+          Methods.mutation.ADD_GATE,
+          Methods.mutation.SUB_GATE,
+          Methods.mutation.ADD_SELF_CONN,
+          Methods.mutation.SUB_SELF_CONN,
+          Methods.mutation.ADD_BACK_CONN,
+          Methods.mutation.SUB_BACK_CONN
         ],
         popsize: this.config.populationSize,
         mutationRate: mutationRate,
@@ -94,7 +94,9 @@ Manager.prototype = {
     }
   },
 
-  tick: function(){
+  tick: async function(){
+    var sleepTime = this.config.gameSpeedUp == true ? 1 : 50;
+    await this.sleep(sleepTime);
     if(!this.started || this.paused) return;
 
     var that = this;

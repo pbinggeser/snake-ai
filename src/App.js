@@ -19,6 +19,7 @@ class App extends Component {
       borderWalls: true,
       canEatSelf: true,
       growWhenEating: true, 
+      gameSpeedUp: true,
       displaySize: 100,
       gridResolution: 20,
       running: false,
@@ -215,6 +216,11 @@ class App extends Component {
             value={this.state.growWhenEating} 
             label="Snake grows longer when it eats."
             onToggle={(e)=> { that.setState({ growWhenEating: !that.state.growWhenEating })}}
+          ></Switch>
+          <Switch 
+            value={this.state.gameSpeedUp} 
+            label="Runs with high speed."
+            onToggle={(e)=> { that.setState({ gameSpeedUp: !that.state.gameSpeedUp })}}
           ></Switch>
           
         </div>

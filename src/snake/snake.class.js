@@ -56,6 +56,9 @@ Snake.prototype = {
     context.beginPath();
     context.arc((this.state.food.x + .5) / this.config.gridResolution * this.config.displaySize, (this.state.food.y + .5) / this.config.gridResolution * this.config.displaySize, this.config.displaySize / this.config.gridResolution / 2, 0, 2 * Math.PI);
     context.fill();
+    // Show the different textAlign values
+    context.textAlign = "start";      
+    context.fillText(this.currentScore + "/" + this.bestScore, 10, 20);   
   },
 
   look: function(){
