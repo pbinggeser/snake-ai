@@ -12,14 +12,14 @@ class App extends Component {
     this.state = {
       populationSize: 50,
       elitismPercent: 10,
-      foodScore: 10,
-      moveTowardsScore: 1,
-      moveAwayScore: -1.5,
+      foodScore: 25, //10
+      moveTowardsScore: 2,
+      moveAwayScore: -3, //-1.5
       initialSnakeLength: 4,
       borderWalls: true,
       canEatSelf: true,
       growWhenEating: true, 
-      gameSpeedUp: true,
+      gameSpeedUp: false,
       displaySize: 100,
       gridResolution: 20,
       running: false,
@@ -256,6 +256,9 @@ class App extends Component {
             <h3 style={{marginBottom: 10}}>Performance by Generation</h3>
             <div id="graph">
               {/* graph will load here */}
+            </div>
+            <div className="row">
+              <svg className="draw" width="1000px" height="500px"/>
             </div>
             <p>
               This graph shows a dot for every individual neural net's performance. Each new generation will appear at to the right.

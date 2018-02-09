@@ -3,11 +3,17 @@
   "version": "0.1.0",
   "private": true,
   "homepage": "https://pbinggeser.github.io/snake-ai/",
+  "node": {
+    "child_process": "empty"
+  },
   "dependencies": {
     "d3": "^4.9.1",
+    "jest-cli": "^22.2.1",
     "neataptic": "^1.2.6",
+    "node-sass-chokidar": "^0.0.3",
     "react": "^15.5.4",
-    "react-dom": "^15.5.4"
+    "react-dom": "^15.5.4",
+    "webcola": "^3.3.8"
   },
   "devDependencies": {
     "create-react-app-sass": "^1.1.0",
@@ -15,8 +21,10 @@
     "react-scripts": "1.0.5"
   },
   "scripts": {
+    "build-css": "node-sass-chokidar src/ -o src/",
+    "watch-css": "npm run build-css && node-sass-chokidar src/ -o src/ --watch --recursive",
     "start": "react-scripts-with-sass start",
-    "build": "react-scripts-with-sass build",
+    "build": "yarn run build-css && react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
     "predeploy": "npm run build",

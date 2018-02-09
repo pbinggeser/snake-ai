@@ -15,14 +15,10 @@ var snakes;
 var generationLog;
 var generationTimeLog;
 var iterationCounter;
-
-
 var mutationRate = .3;
-
 var inputSize = 6;
-var startHiddenSize = 1;
+var startHiddenSize = 2;
 var outputSize = 3;
-
 
 function Manager(){
   this.started = false;
@@ -35,8 +31,10 @@ Manager.prototype = {
   sleep: function(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
   },
+
   start: function(){
     snakes = [];
+    var i;
     generationLog = [];
     generationTimeLog = [];
     iterationCounter = 0;
@@ -64,6 +62,7 @@ Manager.prototype = {
         popsize: this.config.populationSize,
         mutationRate: mutationRate,
         elitism: Math.round(this.config.elitismPercent / 100 * this.config.populationSize),
+        //network: new Architect.Random(
         network: new Architect.Random(
           inputSize,
           startHiddenSize,
@@ -78,6 +77,16 @@ Manager.prototype = {
     }
     this.started = true;
     this.paused = false;
+    
+    for(i in snakes){
+      var canvas = document.getElementById('snake-canvas-'+ i);      
+      canvas.addEventListener("click", function(evt){
+        //console.log(snakes[this.id.substr(this.id.length-1)]);
+        var a = snakes[this.id.substr(this.id.length-1)];
+        console.log(a.brain.graph(200,200));
+        //drawGraph(a.brain.graph(200,200), ".draw")
+      });
+    }
 
     setTimeout(function(){
       d3.select('#gen').html("1");  
@@ -95,7 +104,7 @@ Manager.prototype = {
   },
 
   tick: async function(){
-    var sleepTime = this.config.gameSpeedUp == true ? 1 : 50;
+    var sleepTime = this.config.gameSpeedUp === true ? 1 : 50;
     await this.sleep(sleepTime);
     if(!this.started || this.paused) return;
 
@@ -162,7 +171,7 @@ Manager.prototype = {
 
       })
 
-      this.drawGraph();
+      this.drawHistoryGraph();
     
       setTimeout(function(){
         that.breed();
@@ -197,8 +206,6 @@ Manager.prototype = {
       newPopulation.push(neat.getOffspring());
     }
 
-    // console.log(newPopulation.length);
-
     // Replace the old population with the new population
     neat.population = newPopulation;
     neat.mutate();
@@ -232,7 +239,7 @@ Manager.prototype = {
     this.tick();
   },
 
-  drawGraph: function(){
+  drawHistoryGraph: function(){
     d3.select('#graph').selectAll('svg').remove();
 
     var width = document.getElementById('graph').clientWidth;

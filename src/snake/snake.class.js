@@ -26,17 +26,19 @@ function Snake(genome, config){
 }
 
 Snake.prototype = {
-
+  getFontSize: function(t) {
+    var val = (1/(1+Math.pow(Math.E, -t/10)) * 10);
+    if(val < 0.5) return 0.5;
+    else return val;
+  },
   hideCanvas: function(context){
     context.fillStyle = 'rgba(255,255,255,.75)';
     context.fillRect(0, 0, this.config.displaySize, this.config.displaySize);
   },
   bragCanvas: function(context){
-    // context.globalAlpha = .25;
     context.strokeStyle = '#3aa3e3';
     context.lineWidth = 4;
     context.strokeRect(0, 0, this.config.displaySize, this.config.displaySize);
-    // context.globalAlpha = 1;
   },
   showCanvas: function(context){
     context.clearRect(0, 0, this.config.displaySize, this.config.displaySize);
@@ -57,7 +59,10 @@ Snake.prototype = {
     context.arc((this.state.food.x + .5) / this.config.gridResolution * this.config.displaySize, (this.state.food.y + .5) / this.config.gridResolution * this.config.displaySize, this.config.displaySize / this.config.gridResolution / 2, 0, 2 * Math.PI);
     context.fill();
     // Show the different textAlign values
-    context.textAlign = "start";      
+    context.textAlign = "start";   
+    context.fillStyle = "#red";
+    
+    context.font = 'italic ' + this.getFontSize(this.currentScore) + 'pt Calibri';
     context.fillText(this.currentScore + "/" + this.bestScore, 10, 20);   
   },
 
@@ -204,12 +209,14 @@ Snake.prototype = {
       }
     }
 
+    if(this.currentScore < -50) died = true;
+
     if(!died){
       var eating = false;
       if(head.x === this.state.food.x && head.y === this.state.food.y){
         eating = true;
 
-        this.currentScore += this.config.foodScore;
+        this.currentScore += this.config.foodScore - 0;
         this.lastDistance = this.config.gridResolution*2;
       }
 
@@ -221,9 +228,9 @@ Snake.prototype = {
 
       var d = distance(head.x, head.y, this.state.food.x, this.state.food.y);
       if(d < this.lastDistance){
-        this.currentScore += this.config.moveTowardsScore;
+        this.currentScore += this.config.moveTowardsScore - 0;
       } else {
-        this.currentScore += this.config.moveAwayScore;
+        this.currentScore += this.config.moveAwayScore - 0;
       }
 
       this.lastDistance = d;
