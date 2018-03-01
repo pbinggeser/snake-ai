@@ -243,6 +243,7 @@ class App extends Component {
               canvases.map(function(d, i){
                 return <div className="grid-item" key={i}>
                   <canvas 
+                    name={"snake-canvas"}
                     id={"snake-canvas-" + i} 
                     width={that.state.displaySize + "px"} 
                     height={that.state.displaySize + "px"}

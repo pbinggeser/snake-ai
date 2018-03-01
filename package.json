@@ -6,8 +6,9 @@
   "node": {
     "child_process": "empty"
   },
+  "browser": { "fs": false, "child_process": false },
   "dependencies": {
-    "d3": "^4.9.1",
+    "d3": "4.4.0",
     "jest-cli": "^22.2.1",
     "neataptic": "^1.2.6",
     "node-sass-chokidar": "^0.0.3",
@@ -16,15 +17,14 @@
     "webcola": "^3.3.8"
   },
   "devDependencies": {
-    "create-react-app-sass": "^1.1.0",
     "gh-pages": "^1.0.0",
-    "react-scripts": "1.0.5"
+    "react-scripts": "1.0.13"
   },
   "scripts": {
     "build-css": "node-sass-chokidar src/ -o src/",
     "watch-css": "npm run build-css && node-sass-chokidar src/ -o src/ --watch --recursive",
-    "start": "react-scripts-with-sass start",
-    "build": "yarn run build-css && react-scripts build",
+    "start": "react-scripts start",
+    "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
     "predeploy": "npm run build",
