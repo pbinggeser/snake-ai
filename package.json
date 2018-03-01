@@ -6,7 +6,10 @@
   "node": {
     "child_process": "empty"
   },
-  "browser": { "fs": false, "child_process": false },
+  "browser": {
+    "fs": false,
+    "child_process": false
+  },
   "dependencies": {
     "d3": "4.4.0",
     "jest-cli": "^22.2.1",
@@ -17,7 +20,20 @@
     "webcola": "^3.3.8"
   },
   "devDependencies": {
+    "babel-eslint": "^8.2.2",
+    "eslint": "4.9.0",
+    "eslint-config-airbnb": "16.1.0",
+    "eslint-config-airbnb-base": "12.1.0",
+    "eslint-config-prettier": "^2.9.0",
+    "eslint-config-react-app": "^2.1.0",
+    "eslint-plugin-flowtype": "^2.46.1",
+    "eslint-plugin-import": "^2.9.0",
+    "eslint-plugin-jsx-a11y": "^6.0.3",
+    "eslint-plugin-prettier": "^2.6.0",
+    "eslint-plugin-react": "^7.7.0",
     "gh-pages": "^1.0.0",
+    "prettier": "^1.11.1",
+    "prettier-eslint": "^8.8.1",
     "react-scripts": "1.0.13"
   },
   "scripts": {
