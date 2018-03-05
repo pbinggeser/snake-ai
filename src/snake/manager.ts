@@ -1,33 +1,48 @@
-import Snake from "./snake.class";
+import Snake from './snake';
 
-const neataptic = require("neataptic");
-const d3 = require("d3");
+const neataptic = require('neataptic');
+const d3 = require('d3');
 
 const { Neat } = neataptic;
 const Methods = neataptic.methods;
 const Architect = neataptic.architect;
 
 // Global vars
-let neat;
-let snakes;
-let generationLog;
-let generationTimeLog;
-let iterationCounter;
+let neat: any;
+let snakes: Snake[];
+let generationLog: any;
+let generationTimeLog: any;
+let iterationCounter: number;
 const mutationRate = 0.3;
 const inputSize = 6;
 const startHiddenSize = 2;
 const outputSize = 3;
 
-function Manager() {
-  this.started = false;
-  this.paused = false;
-  return this;
+interface IConfig {
+  populationSize: number;
+  elitismPercent: number;
+  displaySize: number;
+  gridResolution: number;
+  growWhenEating: boolean;
+  canEatSelf: boolean;
+  moveTowardsScore: number;
+  moveAwayScore: number;
+  foodScore: number;
+  gameSpeedUp: boolean;
 }
 
-Manager.prototype = {
-  sleep(ms) {
+class Manager {
+  started: boolean;
+  paused: boolean;
+  config: IConfig;
+  constructor(config: IConfig) {
+    this.started = false;
+    this.paused = false;
+    this.config = config;
+  }
+  sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
-  },
+  }
 
   start() {
     snakes = [];
@@ -66,34 +81,32 @@ Manager.prototype = {
     this.started = true;
     this.paused = false;
 
-    document.addEventListener("click", evt => {
-      if (evt.target.id.indexOf("snake-canvas") !== -1) {
+    document.addEventListener('click', evt => {
+      if (evt.target.id.indexOf('snake-canvas') !== -1) {
         const { target } = evt;
         const selectedSnake = snakes[target.id.substr(target.id.length - 1)];
-        this.drawGraph(selectedSnake.brain.graph(400, 400), ".draw");
+        this.drawGraph(selectedSnake.brain.graph(400, 400), '.draw');
         // console.log(selectedSnake.brain.graph(400, 400);
       }
     });
 
-    setTimeout(() => {
-      d3.select("#gen").html("1");
-    }, 10);
+    setTimeout(() => { d3.select('#gen').html('1'); }, 10);
     this.tick();
-  },
+  }
 
-  updateSettings(newConfig) {
+  updateSettings(newConfig: IConfig) {
     this.config = newConfig;
     if (snakes) {
       snakes.forEach(snake => Object.assign(snake.config, newConfig));
     }
-  },
+  }
 
   async tick() {
     const sleepTime = this.config.gameSpeedUp === true ? 1 : 50;
     const that = this;
     let i;
     await this.sleep(sleepTime);
-    if (!this.started || this.paused) return;
+    if (!this.started || this.paused) { return; }
     iterationCounter += 1;
     // clone snakes so we don't mess with the originals
     const clonedSnakes = JSON.parse(JSON.stringify(snakes));
@@ -101,8 +114,8 @@ Manager.prototype = {
       clonedSnake.index = j;
     });
     clonedSnakes.sort((a, b) => {
-      if (a.firstAttemptScore > b.firstAttemptScore) return -1;
-      if (a.firstAttemptScore < b.firstAttemptScore) return 1;
+      if (a.firstAttemptScore > b.firstAttemptScore) { return -1; }
+      if (a.firstAttemptScore < b.firstAttemptScore) { return 1; }
       return 0;
     });
 
@@ -134,14 +147,14 @@ Manager.prototype = {
           snakes[clonedSnakes[j].index].bragCanvas(
             document
               .getElementById(`snake-canvas-${clonedSnakes[j].index}`)
-              .getContext("2d")
+              .getContext('2d')
           );
           top = true;
         } else {
           snakes[clonedSnakes[j].index].hideCanvas(
             document
               .getElementById(`snake-canvas-${clonedSnakes[j].index}`)
-              .getContext("2d")
+              .getContext('2d')
           );
         }
         newLog.push({
@@ -167,14 +180,14 @@ Manager.prototype = {
           snake.look();
           const context = document
             .getElementById(`snake-canvas-${j}`)
-            .getContext("2d");
+            .getContext('2d');
           snake.showCanvas(context);
           snake.moveCanvas(context);
         });
         that.tick();
       }, 1);
     }
-  },
+  }
 
   breed() {
     neat.sort();
@@ -195,7 +208,7 @@ Manager.prototype = {
     neat.population = newPopulation;
     neat.mutate();
     neat.generation += 1;
-    d3.select("#gen").html(neat.generation + 1);
+    d3.select('#gen').html(neat.generation + 1);
     snakes = [];
 
     neat.population.forEach((genome, j) => {
@@ -205,35 +218,35 @@ Manager.prototype = {
 
     iterationCounter = 0;
     this.tick();
-  },
+  }
 
   stop() {
     this.started = false;
     this.paused = true;
-  },
+  }
 
   pause() {
     this.paused = true;
-  },
+  }
 
   resume() {
     this.paused = false;
     this.tick();
-  },
+  }
 
   drawHistoryGraph() {
     d3
-      .select("#graph")
-      .selectAll("svg")
+      .select('#graph')
+      .selectAll('svg')
       .remove();
-    const width = document.getElementById("graph").clientWidth;
-    const height = document.getElementById("graph").clientHeight;
+    const width = document.getElementById('graph').clientWidth;
+    const height = document.getElementById('graph').clientHeight;
 
     const svg = d3
-      .select("#graph")
-      .append("svg")
-      .attr("height", height)
-      .attr("width", width);
+      .select('#graph')
+      .append('svg')
+      .attr('height', height)
+      .attr('width', width);
 
     const pad = {
       left: 35,
@@ -261,39 +274,39 @@ Manager.prototype = {
 
     if (yScale(0) > pad.top && yScale(0) < height - pad.bottom) {
       svg
-        .append("line")
-        .attr("x1", pad.left - 6)
-        .attr("y1", yScale(0) + 0.5)
-        .attr("x2", width - pad.right)
-        .attr("y2", yScale(0) + 0.5)
-        .attr("stroke", "#000")
-        .attr("stroke-width", 2)
-        .style("shape-rendering", "crispEdges");
+        .append('line')
+        .attr('x1', pad.left - 6)
+        .attr('y1', yScale(0) + 0.5)
+        .attr('x2', width - pad.right)
+        .attr('y2', yScale(0) + 0.5)
+        .attr('stroke', '#000')
+        .attr('stroke-width', 2)
+        .style('shape-rendering', 'crispEdges');
     }
 
     const genSvg = svg
-      .selectAll("generation")
+      .selectAll('generation')
       .data(generationLog)
       .enter()
-      .append("g");
+      .append('g');
 
     const netSvg = genSvg
-      .selectAll("net")
+      .selectAll('net')
       .data(d => d)
       .enter();
 
     netSvg
-      .append("circle")
-      .attr("cx", d => xScale(d.generation))
-      .attr("cy", d => yScale(d.score))
-      .attr("opacity", d => {
-        if (d.top) return 0.8;
+      .append('circle')
+      .attr('cx', d => xScale(d.generation))
+      .attr('cy', d => yScale(d.score))
+      .attr('opacity', d => {
+        if (d.top) { return 0.8; }
         return 0.25;
       })
-      .attr("r", 2.5)
-      .attr("fill", d => {
-        if (d.top) return "#3aa3e3";
-        return "#000";
+      .attr('r', 2.5)
+      .attr('fill', d => {
+        if (d.top) { return '#3aa3e3'; }
+        return '#000';
       });
 
     const medianLine = [];
@@ -303,15 +316,15 @@ Manager.prototype = {
     for (let i = 0; i < generationLog.length; i += 1) {
       medianLine.push({
         score: calculateQ(generationLog[i], 0.5),
-        generation: parseInt(i, 10)
+        generation: parseInt(String(i), 10)
       });
       q1Line.push({
         score: calculateQ(generationLog[i], 0.25),
-        generation: parseInt(i, 10)
+        generation: parseInt(String(i), 10)
       });
       q3Line.push({
         score: calculateQ(generationLog[i], 0.75),
-        generation: parseInt(i, 10)
+        generation: parseInt(String(i), 10)
       });
     }
 
@@ -322,50 +335,50 @@ Manager.prototype = {
       .curve(d3.curveCardinal);
 
     svg
-      .append("path")
-      .attr("d", lineFunction(medianLine))
-      .attr("stroke", "#000")
-      .attr("stroke-width", 4)
-      .attr("fill", "none")
-      .attr("opacity", 0.25);
+      .append('path')
+      .attr('d', lineFunction(medianLine))
+      .attr('stroke', '#000')
+      .attr('stroke-width', 4)
+      .attr('fill', 'none')
+      .attr('opacity', 0.25);
 
     svg
-      .append("path")
-      .attr("d", lineFunction(q1Line))
-      .attr("stroke", "#000")
-      .attr("stroke-width", 1)
-      .attr("stroke-dasharray", "5,5")
-      .attr("fill", "none")
-      .attr("opacity", 0.25);
+      .append('path')
+      .attr('d', lineFunction(q1Line))
+      .attr('stroke', '#000')
+      .attr('stroke-width', 1)
+      .attr('stroke-dasharray', '5,5')
+      .attr('fill', 'none')
+      .attr('opacity', 0.25);
 
     svg
-      .append("path")
-      .attr("d", lineFunction(q3Line))
-      .attr("stroke", "#000")
-      .attr("stroke-width", 1)
-      .attr("stroke-dasharray", "5,5")
-      .attr("fill", "none")
-      .attr("opacity", 0.25);
+      .append('path')
+      .attr('d', lineFunction(q3Line))
+      .attr('stroke', '#000')
+      .attr('stroke-width', 1)
+      .attr('stroke-dasharray', '5,5')
+      .attr('fill', 'none')
+      .attr('opacity', 0.25);
 
     // Add the x Axis
     svg
-      .append("g")
-      .attr("transform", `translate(0,${height - pad.bottom})`)
+      .append('g')
+      .attr('transform', `translate(0,${height - pad.bottom})`)
       .call(d3.axisBottom(xScale));
 
     // Add the x Axis
     svg
-      .append("g")
-      .attr("transform", `translate(${pad.left},0)`)
+      .append('g')
+      .attr('transform', `translate(${pad.left},0)`)
       .call(d3.axisLeft(yScale));
 
-    svg.selectAll(".domain").attr("opacity", 0);
+    svg.selectAll('.domain').attr('opacity', 0);
 
     svg
-      .selectAll(".tick")
-      .selectAll("line")
-      .attr("opacity", 0.5);
-  },
+      .selectAll('.tick')
+      .selectAll('line')
+      .attr('opacity', 0.5);
+  }
 
   drawGraph(graph, panel) {
     const NODE_RADIUS = 7;
@@ -386,19 +399,19 @@ Manager.prototype = {
 
     // define arrow markers for graph links
     svg
-      .append("svg:defs")
-      .append("svg:marker")
-      .attr("id", "end-arrow")
-      .attr("viewBox", "0 -5 10 10")
-      .attr("refX", 6)
-      .attr("markerWidth", 4)
-      .attr("markerHeight", 4)
-      .attr("orient", "auto")
-      .append("svg:path")
-      .attr("d", "M0,-5L10,0L0,5");
+      .append('svg:defs')
+      .append('svg:marker')
+      .attr('id', 'end-arrow')
+      .attr('viewBox', '0 -5 10 10')
+      .attr('refX', 6)
+      .attr('markerWidth', 4)
+      .attr('markerHeight', 4)
+      .attr('orient', 'auto')
+      .append('svg:path')
+      .attr('d', 'M0,-5L10,0L0,5');
 
     graph.nodes.forEach(v => {
-      v.height = 2 * (v.name === "GATE" ? GATE_RADIUS : NODE_RADIUS);
+      v.height = 2 * (v.name === 'GATE' ? GATE_RADIUS : NODE_RADIUS);
       v.width = v.height;
     });
 
@@ -411,14 +424,14 @@ Manager.prototype = {
       .start(10, 15, 20);
 
     const path = svg
-      .selectAll(".link")
+      .selectAll('.link')
       .data(graph.links)
       .enter()
-      .append("svg:path")
-      .attr("class", "link");
+      .append('svg:path')
+      .attr('class', 'link');
 
-    path.append("title").text(d => {
-      let text = "";
+    path.append('title').text(d => {
+      let text = '';
       text += `Weight: ${Math.round(d.weight * 1000) / 1000}\n`;
       text += `Source: ${d.source.id}\n`;
       text += `Target: ${d.target.id}`;
@@ -426,16 +439,16 @@ Manager.prototype = {
     });
 
     const node = svg
-      .selectAll(".node")
+      .selectAll('.node')
       .data(graph.nodes)
       .enter()
-      .append("circle")
-      .attr("class", d => `node ${d.name}`)
-      .attr("r", d => (d.name === "GATE" ? GATE_RADIUS : NODE_RADIUS));
+      .append('circle')
+      .attr('class', d => `node ${d.name}`)
+      .attr('r', d => (d.name === 'GATE' ? GATE_RADIUS : NODE_RADIUS));
     // .call(d3cola.drag);
 
-    node.append("title").text(d => {
-      let text = "";
+    node.append('title').text(d => {
+      let text = '';
       text += `Activation: ${Math.round(d.activation * 1000) / 1000}\n`;
       text += `Bias: ${Math.round(d.bias * 1000) / 1000}\n`;
       text += `Position: ${d.id}`;
@@ -443,25 +456,25 @@ Manager.prototype = {
     });
 
     const label = svg
-      .selectAll(".label")
+      .selectAll('.label')
       .data(graph.nodes)
       .enter()
-      .append("text")
-      .attr("class", "label")
+      .append('text')
+      .attr('class', 'label')
       .text(d => `(${d.index}) ${d.name}`);
     // .call(d3cola.drag);
 
-    d3cola.on("tick", () => {
+    d3cola.on('tick', () => {
       // draw directed edges with proper padding from node centers
-      path.attr("d", d => {
+      path.attr('d', d => {
         const deltaX = d.target.x - d.source.x;
         const deltaY = d.target.y - d.source.y;
         const dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
         let normX = deltaX / dist;
         let normY = deltaY / dist;
 
-        if (isNaN(normX)) normX = 0;
-        if (isNaN(normY)) normY = 0;
+        if (isNaN(normX)) { normX = 0; }
+        if (isNaN(normY)) { normY = 0; }
 
         const sourcePadding = d.source.width / 2;
         const targetPadding = d.target.width / 2 + 2;
@@ -489,24 +502,24 @@ Manager.prototype = {
         return `M${sourceX},${sourceY}A${drx},${dry} ${xRotation},${largeArc},${sweep} ${targetX},${targetY}`;
       });
 
-      node.attr("cx", d => d.x).attr("cy", d => d.y);
+      node.attr('cx', d => d.x).attr('cy', d => d.y);
 
-      label.attr("x", d => d.x + 10).attr("y", d => d.y - 10);
+      label.attr('x', d => d.x + 10).attr('y', d => d.y - 10);
     });
   }
-};
+}
 
-function calculateQ(values, Q) {
-  values.sort((a, b) => a.score - b.score);
+function calculateQ(values: any, Q: number) {
+  values.sort((a: any, b: any) => a.score - b.score);
 
-  if (values.length === 0) return 0;
+  if (values.length === 0) { return 0; }
 
   const index = Math.floor(values.length * Q);
 
   if (values.length % 2) {
     return values[index].score;
   }
-  if (index - 1 < 0) return 0;
+  if (index - 1 < 0) { return 0; }
   return (values[index - 1].score + values[index].score) / 2.0;
 }
 
