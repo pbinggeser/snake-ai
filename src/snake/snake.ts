@@ -1,5 +1,11 @@
+import { IConfig } from './manager';
 
 export interface ISnake {
+  key: string;
+  data: number[];
+  theta: string;
+  checks: any;
+  dead: boolean;
   currentScore: number;
   firstAttemptScore: number;
   bestScore: number;
@@ -11,26 +17,23 @@ export interface ISnake {
   turnAngle: number;
   lastDirection: number;
   lastDistance: number;
-  restart: () => void;
-  makeFood: () => void;
+  index: number;
   state: any;
   config: any;
   brain: IBrain;
+  look: () => void;
+  moveCanvas: (context: CanvasRenderingContext2D) => void;
+  makeFood: () => void;
+  restart: () => void;
+  getFontSize: (t: number) => number;
+  hideCanvas: (context: CanvasRenderingContext2D) => void;
+  bragCanvas: (context: CanvasRenderingContext2D) => void;
+  showCanvas: (context: CanvasRenderingContext2D) => void;
 }
 
 export interface IBrain {
   score: number;
   activate: (data: number[]) => number[];
-}
-
-export interface IConfig {
-  displaySize: number;
-  gridResolution: number;
-  growWhenEating: boolean;
-  canEatSelf: boolean;
-  moveTowardsScore: number;
-  moveAwayScore: number;
-  foodScore: number;
 }
 
 class Snake {
@@ -53,11 +56,13 @@ class Snake {
   state: any;
   config: any;
   brain: IBrain;
+  
   constructor(brain: any, config: IConfig) {
     this.state = {};
     this.config = config;
-    brain.score = 0;
-
+    this.brain = brain;
+    this.key = '';
+    this.brain.score = 0;
     this.currentScore = 0;
     this.firstAttemptScore = 0;
     this.bestScore = 0;
@@ -66,13 +71,16 @@ class Snake {
 
     this.highScore = 0;
     this.gamesPlayed = -1;
-
+    
+    this.restart();    
     this.direction = 0;
     this.turnAngle = 90;
+    this.makeFood();
     this.lastDirection = undefined;
     this.lastDistance = this.config.gridResolution;
+    
   }
-  getFontSize(t: number) {
+  getFontSize(t: number): number {
     const val = 1 / (1 + Math.pow(Math.E, -t / 10)) * 15;
     if (val < 8) { return 8; }
     return val;
@@ -126,7 +134,6 @@ class Snake {
     context.textAlign = 'start';
     context.fillStyle = '#red';
     context.font = `italic ${this.getFontSize(this.currentScore)}pt Calibri`;
-    // console.log(this.getFontSize(this.currentScore));
     context.fillText(`${this.currentScore}/${this.bestScore}`, 10, 20);
   }
 
@@ -142,8 +149,10 @@ class Snake {
     const d = radiansToDegrees(a);
 
     let theta = d + 90;
-    if (theta > 180) { theta -= 360; }
-    theta += this.direction;
+    if (theta > 180) { 
+      theta -= 360;
+      theta += this.direction;
+    }    
 
     if (theta > 180) { theta -= 360; }
 
@@ -177,39 +186,37 @@ class Snake {
     }
 
     // for (const i in this.checks) {
-    Object.keys(this.checks).forEach(i => {
-      const tx = this.checks[i].x + head.x;
-      const ty = this.checks[i].y + head.y;
+    this.checks.forEach((check: any, _i: number) => {
+      const tx = check.x + head.x;
+      const ty = check.y + head.y;
 
       if (tx < 0 || tx >= this.config.gridResolution) {
         data.push(1);
-        this.checks[i].hit = true;
-        // continue;
+        check.hit = true;
+        return;
       }
 
       if (ty < 0 || ty >= this.config.gridResolution) {
         data.push(1);
-        this.checks[i].hit = true;
-        // continue;
+        check.hit = true;
+        return;
       }
 
       let bodyHit = false;
-      // for (const j in this.state.body) {
-      Object.keys(this.state.body).forEach(j => {
-        const b = this.state.body[j];
-        if (b.x === tx && b.y === ty) {
+      this.state.body.forEach((body: any, _j: number) => {
+        if (body.x === tx && body.y === ty) {
           bodyHit = true;
           return;
         }
-
-        if (bodyHit) {
-          data.push(1);
-          this.checks[i].hit = true;
-          // continue;
-        }
-        this.checks[i].hit = false;
-        data.push(0);
       });
+
+      if (bodyHit) {
+        data.push(1);
+        this.checks.hit = true;
+        return;
+      }
+      this.checks.hit = false;
+      data.push(0);      
     });
 
     this.data = data;

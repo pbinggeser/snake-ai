@@ -1,4 +1,4 @@
-import Snake from './snake';
+import Snake, { ISnake } from './snake';
 
 const neataptic = require('neataptic');
 const d3 = require('d3');
@@ -18,19 +18,22 @@ const inputSize = 6;
 const startHiddenSize = 2;
 const outputSize = 3;
 
-interface IConfig {
+export interface IConfig {  
   populationSize: number;
   elitismPercent: number;
+  initialSnakeLength: number; 
   displaySize: number;
   gridResolution: number;
   growWhenEating: boolean;
-  canEatSelf: boolean;
+  canEatSelf: boolean; 
+  borderWalls: boolean;
+  gameSpeedUp: boolean;
+  running: boolean;
+  paused: boolean;
   moveTowardsScore: number;
   moveAwayScore: number;
-  foodScore: number;
-  gameSpeedUp: boolean;
+  foodScore: number;  
 }
-
 class Manager {
   started: boolean;
   paused: boolean;
@@ -74,17 +77,18 @@ class Manager {
       network: new Architect.Random(inputSize, startHiddenSize, outputSize)
     });
 
-    Object.keys(neat.population).forEach(i => {
-      const genome = neat.population[i];
+    neat.population.forEach((genome: any) => {
+      // let genome = neat.population[i];
       snakes.push(new Snake(genome, this.config));
     });
     this.started = true;
     this.paused = false;
 
-    document.addEventListener('click', evt => {
-      if (evt.target.id.indexOf('snake-canvas') !== -1) {
-        const { target } = evt;
-        const selectedSnake = snakes[target.id.substr(target.id.length - 1)];
+    document.addEventListener('click', e => {
+      let canvasId = String((<HTMLCanvasElement> e.target).id.indexOf('snake-canvas'));
+      if (canvasId !== '-1') {
+        // const { target } = evt;        
+        const selectedSnake = snakes[String(canvasId).substr(canvasId.length - 1)];
         this.drawGraph(selectedSnake.brain.graph(400, 400), '.draw');
         // console.log(selectedSnake.brain.graph(400, 400);
       }
@@ -110,10 +114,10 @@ class Manager {
     iterationCounter += 1;
     // clone snakes so we don't mess with the originals
     const clonedSnakes = JSON.parse(JSON.stringify(snakes));
-    clonedSnakes.forEach((clonedSnake, j) => {
+    clonedSnakes.forEach((clonedSnake: ISnake, j: number) => {
       clonedSnake.index = j;
     });
-    clonedSnakes.sort((a, b) => {
+    clonedSnakes.sort((a: ISnake, b: ISnake) => {
       if (a.firstAttemptScore > b.firstAttemptScore) { return -1; }
       if (a.firstAttemptScore < b.firstAttemptScore) { return 1; }
       return 0;
@@ -140,25 +144,19 @@ class Manager {
     }
 
     if (hasEveryoneDied) {
-      const newLog = [];
-      clonedSnakes.forEach((clonedSnake, j) => {
+      const newLog: { score: any; generation: any; top: boolean; }[] = [];
+      clonedSnakes.forEach((clonedSnake: ISnake, j: number) => {
         let top = false;
+        let canvasCtx = (<HTMLCanvasElement> document.getElementById(`snake-canvas-${clonedSnake.index}`))
+                        .getContext('2d');
         if (j < this.config.populationSize * this.config.elitismPercent / 100) {
-          snakes[clonedSnakes[j].index].bragCanvas(
-            document
-              .getElementById(`snake-canvas-${clonedSnakes[j].index}`)
-              .getContext('2d')
-          );
+          snakes[clonedSnake.index].bragCanvas(canvasCtx!);
           top = true;
         } else {
-          snakes[clonedSnakes[j].index].hideCanvas(
-            document
-              .getElementById(`snake-canvas-${clonedSnakes[j].index}`)
-              .getContext('2d')
-          );
+          snakes[clonedSnake.index].hideCanvas(canvasCtx!);
         }
         newLog.push({
-          score: clonedSnakes[j].firstAttemptScore,
+          score: clonedSnake.firstAttemptScore,
           generation: generationLog.length,
           top
         });
@@ -168,24 +166,21 @@ class Manager {
       generationTimeLog.push({
         index: generationTimeLog.length
       });
-
       this.drawHistoryGraph();
-
-      setTimeout(() => {
-        that.breed();
-      }, 1000);
+      setTimeout(() => { that.breed(); }, 1000);
     } else {
       setTimeout(() => {
         snakes.forEach((snake, j) => {
           snake.look();
-          const context = document
-            .getElementById(`snake-canvas-${j}`)
-            .getContext('2d');
-          snake.showCanvas(context);
-          snake.moveCanvas(context);
+          let canvasCtx = (<HTMLCanvasElement> document.getElementById(`snake-canvas-${j}`))
+                        .getContext('2d');
+          snake.showCanvas(canvasCtx!);
+          snake.moveCanvas(canvasCtx!);
         });
         that.tick();
-      }, 1);
+        // https://github.com/palantir/tslint/issues/742
+        // tslint:disable-next-line:align 
+        }, 1);
     }
   }
 
@@ -211,9 +206,10 @@ class Manager {
     d3.select('#gen').html(neat.generation + 1);
     snakes = [];
 
-    neat.population.forEach((genome, j) => {
-      const newGenome = neat.population[j];
+    neat.population.forEach((_snake: ISnake, j: number) => {
+      const newGenome = neat.population[j];      
       snakes.push(new Snake(newGenome, this.config));
+      // snakes.push(snake);
     });
 
     iterationCounter = 0;
@@ -239,8 +235,8 @@ class Manager {
       .select('#graph')
       .selectAll('svg')
       .remove();
-    const width = document.getElementById('graph').clientWidth;
-    const height = document.getElementById('graph').clientHeight;
+    const width = document.getElementById('graph')!.clientWidth;
+    const height = document.getElementById('graph')!.clientHeight;
 
     const svg = d3
       .select('#graph')
@@ -263,8 +259,8 @@ class Manager {
       .range([pad.left + 10, width - pad.right - 10])
       .nice();
 
-    const minScore = d3.min(generationLog, d => d3.min(d, e => e.score)) || -10;
-    const maxScore = d3.max(generationLog, d => d3.max(d, e => e.score)) || 10;
+    const minScore = d3.min(generationLog, (d: any) => d3.min(d, (e: any) => e.score)) || -10;
+    const maxScore = d3.max(generationLog, (d: any) => d3.max(d, (e: any) => e.score)) || 10;
 
     const yScale = d3
       .scaleLinear()
@@ -292,19 +288,19 @@ class Manager {
 
     const netSvg = genSvg
       .selectAll('net')
-      .data(d => d)
+      .data((d: any) => d)
       .enter();
 
     netSvg
       .append('circle')
-      .attr('cx', d => xScale(d.generation))
-      .attr('cy', d => yScale(d.score))
-      .attr('opacity', d => {
+      .attr('cx', (d: any) => xScale(d.generation))
+      .attr('cy', (d: any) => yScale(d.score))
+      .attr('opacity', (d: any) => {
         if (d.top) { return 0.8; }
         return 0.25;
       })
       .attr('r', 2.5)
-      .attr('fill', d => {
+      .attr('fill', (d: any) => {
         if (d.top) { return '#3aa3e3'; }
         return '#000';
       });
@@ -330,8 +326,8 @@ class Manager {
 
     const lineFunction = d3
       .line()
-      .x(d => xScale(d.generation))
-      .y(d => yScale(d.score))
+      .x((d: any) => xScale(d.generation))
+      .y((d: any) => yScale(d.score))
       .curve(d3.curveCardinal);
 
     svg
@@ -380,7 +376,7 @@ class Manager {
       .attr('opacity', 0.5);
   }
 
-  drawGraph(graph, panel) {
+  drawGraph(graph: any, panel: string) {
     const NODE_RADIUS = 7;
     const GATE_RADIUS = 2;
     const REPEL_FORCE = 0;
@@ -388,7 +384,7 @@ class Manager {
     const WIDTH = 1000;
     const HEIGHT = 500;
 
-    const d3cola = window.cola
+    const d3cola = (<any> window).cola
       .d3adaptor()
       .avoidOverlaps(true)
       .size([WIDTH, HEIGHT]);
@@ -410,7 +406,7 @@ class Manager {
       .append('svg:path')
       .attr('d', 'M0,-5L10,0L0,5');
 
-    graph.nodes.forEach(v => {
+    graph.nodes.forEach((v: any) => {
       v.height = 2 * (v.name === 'GATE' ? GATE_RADIUS : NODE_RADIUS);
       v.width = v.height;
     });
@@ -430,7 +426,7 @@ class Manager {
       .append('svg:path')
       .attr('class', 'link');
 
-    path.append('title').text(d => {
+    path.append('title').text((d: any) => {
       let text = '';
       text += `Weight: ${Math.round(d.weight * 1000) / 1000}\n`;
       text += `Source: ${d.source.id}\n`;
@@ -443,11 +439,11 @@ class Manager {
       .data(graph.nodes)
       .enter()
       .append('circle')
-      .attr('class', d => `node ${d.name}`)
-      .attr('r', d => (d.name === 'GATE' ? GATE_RADIUS : NODE_RADIUS));
+      .attr('class', (d: any) => `node ${d.name}`)
+      .attr('r', (d: any) => (d.name === 'GATE' ? GATE_RADIUS : NODE_RADIUS));
     // .call(d3cola.drag);
 
-    node.append('title').text(d => {
+    node.append('title').text((d: any) => {
       let text = '';
       text += `Activation: ${Math.round(d.activation * 1000) / 1000}\n`;
       text += `Bias: ${Math.round(d.bias * 1000) / 1000}\n`;
@@ -461,12 +457,12 @@ class Manager {
       .enter()
       .append('text')
       .attr('class', 'label')
-      .text(d => `(${d.index}) ${d.name}`);
+      .text((d: any) => `(${d.index}) ${d.name}`);
     // .call(d3cola.drag);
 
     d3cola.on('tick', () => {
       // draw directed edges with proper padding from node centers
-      path.attr('d', d => {
+      path.attr('d', (d: any) => {
         const deltaX = d.target.x - d.source.x;
         const deltaY = d.target.y - d.source.y;
         const dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
@@ -502,9 +498,8 @@ class Manager {
         return `M${sourceX},${sourceY}A${drx},${dry} ${xRotation},${largeArc},${sweep} ${targetX},${targetY}`;
       });
 
-      node.attr('cx', d => d.x).attr('cy', d => d.y);
-
-      label.attr('x', d => d.x + 10).attr('y', d => d.y - 10);
+      node.attr('cx', (d: any) => d.x).attr('cy', (d: any) => d.y);
+      label.attr('x', (d: any) => d.x + 10).attr('y', (d: any) => d.y - 10);
     });
   }
 }

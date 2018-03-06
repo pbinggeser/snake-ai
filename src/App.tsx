@@ -2,12 +2,12 @@ import React, { Component } from 'react';
 import './styles/App.css';
 import Field from './components/Field';
 import Switch from './components/Switch';
-import Manager from './snake/manager.js';
+import Manager from './snake/manager';
+import { IConfig } from './snake/manager';
 
-var manager;
-
-class App extends Component {
-  constructor(props) {
+class App extends Component<{}, IConfig> {
+  manager: Manager;
+  constructor(props: any) {
     super(props);
     this.state = {
       populationSize: 50,
@@ -25,49 +25,46 @@ class App extends Component {
       running: false,
       paused: false
     };
-
+    this.manager = new Manager(this.state);
     this.start = this.start.bind(this);
     this.pause = this.pause.bind(this);
     this.resume = this.resume.bind(this);
     this.stop = this.stop.bind(this);
-
-    manager = new Manager();
   }
 
   start() {
     this.setState({
       running: true
     });
-    var that = this;
-    manager.updateSettings(that.state);
-    manager.start();
+    this.manager.updateSettings(this.state);
+    this.manager.start();
   }
 
   stop() {
     this.setState({
       running: false
     });
-    manager.stop();
+    this.manager.stop();
   }
 
   pause() {
     this.setState({
       paused: true
     });
-    manager.pause();
+    this.manager.pause();
   }
 
   resume() {
     this.setState({
       paused: false
     });
-    manager.resume();
+    this.manager.resume();
   }
 
   render() {
     var that = this;
 
-    manager.updateSettings(this.state);
+    this.manager.updateSettings(this.state);
 
     var canvases = [];
     for (var i = 0; i < this.state.populationSize; i++) {
@@ -221,28 +218,28 @@ class App extends Component {
           <Switch
             value={this.state.borderWalls}
             label="Snake dies when it hits a wall."
-            onToggle={e => {
+            onToggle={() => {
               that.setState({ borderWalls: !that.state.borderWalls });
             }}
           />
           <Switch
             value={this.state.canEatSelf}
             label="Snake dies when it his itself."
-            onToggle={e => {
+            onToggle={() => {
               that.setState({ canEatSelf: !that.state.canEatSelf });
             }}
           />
           <Switch
             value={this.state.growWhenEating}
             label="Snake grows longer when it eats."
-            onToggle={e => {
+            onToggle={() => {
               that.setState({ growWhenEating: !that.state.growWhenEating });
             }}
           />
           <Switch
             value={this.state.gameSpeedUp}
             label="Runs with high speed."
-            onToggle={e => {
+            onToggle={() => {
               that.setState({ gameSpeedUp: !that.state.gameSpeedUp });
             }}
           />
@@ -258,12 +255,12 @@ class App extends Component {
               )}
           </h3>
           <div id="workspace">
-            {canvases.map(function (d, i) {
+            {canvases.map(j => {
               return (
-                <div className="grid-item" key={i}>
+                <div className="grid-item" key={j}>
                   <canvas
-                    name={'snake-canvas'}
-                    id={'snake-canvas-' + i}
+                    // name={'snake-canvas'}
+                    id={'snake-canvas-' + j}
                     width={that.state.displaySize + 'px'}
                     height={that.state.displaySize + 'px'}
                   />
@@ -306,4 +303,4 @@ class App extends Component {
   }
 }
 
-export = App;
+export default App;

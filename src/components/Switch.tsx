@@ -4,14 +4,13 @@ import React, { Component } from 'react';
 import '../styles/switch.css';
 
 interface ISwitchProps {
-  value: string;
+  value: boolean;
   label: string;
   onToggle: () => void;
 }
 
 class Switch extends Component<ISwitchProps, object> {
   render() {
-
     return (
       <span className={'switch' + (this.props.value ? ' active' : '')} onClick={this.props.onToggle}>
         <span className="switch-label">
@@ -27,10 +26,5 @@ class Switch extends Component<ISwitchProps, object> {
   }
 
 }
-
-// Switch.propTypes = {
-//   value: PropTypes.bool.isRequired,
-//   onToggle: PropTypes.func
-// }
 
 export default Switch;

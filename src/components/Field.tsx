@@ -8,11 +8,11 @@ export interface IFieldProps {
   placeholder?: string;
   type?: string;
   description?: string;
-  blurCounter: number;
+  blurCounter?: number;
   value: string | number;
-  multipleRows: boolean;
+  multipleRows?: boolean;
   disabled?: boolean;
-  inline: boolean;
+  inline?: boolean;
   required: boolean;
   minLength?: number;
   maxLength?: number;
@@ -20,12 +20,13 @@ export interface IFieldProps {
   max?: number;
   step?: number;
   size?: number;
-  serverErrors: any;
+  serverErrors?: any;
   onTouch?: () => void;
   onBlur?: () => void;
+  onChangeEvent?: (v: any) => void;
 }
 
-export interface IFieldState {
+interface IFieldState {
   name: string;
   value: string | number;
   serverErrors: any;
