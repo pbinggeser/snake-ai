@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-// import PropTypes from 'prop-types';
 import '../styles/field.css';
 
 export interface IFieldProps {

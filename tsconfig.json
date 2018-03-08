@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "outDir": "build/static",
+    "removeComments": true,
     "baseUrl": ".",
     "module": "esnext",
     "target": "es5",
