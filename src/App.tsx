@@ -248,7 +248,7 @@ class App extends Component<{}, IConfig> {
           <h3 style={{ marginBottom: 10, marginTop: 0 }}>
             {this.state.running ? (
               <span>
-                Generation <span id="gen" />{' '}
+                Generation <span id="gen" />{''}
               </span>
             ) : (
                 <span>Designing AI: Solving Snake with Evolution</span>
@@ -273,7 +273,7 @@ class App extends Component<{}, IConfig> {
             <h3 style={{ marginBottom: 10 }}>Performance by Generation</h3>
             <div id="graph">{/* graph will load here */}</div>
             <div className="row">
-              <svg className="draw" width="1000px" height="500px" />
+              <svg className="draw" width="800px" height="800px" />
             </div>
             <p>
               This graph shows a dot for every individual neural net's

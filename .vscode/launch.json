@@ -1,0 +1,23 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Launch Chrome against localhost",
+            "url": "http://localhost:3000",
+            "webRoot": "${workSpaceRoot}/src",
+            "sourceMaps": true,
+            "userDataDir": "D:\\vscodechromeprofile",
+            "skipFiles": [
+                "${workspaceFolder}/node_modules/**/*.js",
+                "${workspaceFolder}/build/**/*.js"
+            ],
+            "runtimeArgs": [
+                "--disable-session-crashed-bubble",
+                "--disable-infobars",
+                "--disable-session-restore" /*https://github.com/Microsoft/vscode-chrome-debug/issues/163*/
+			]
+        }
+    ]
+}

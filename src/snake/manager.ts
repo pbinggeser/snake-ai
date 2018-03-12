@@ -1,22 +1,26 @@
 import Snake, { ISnake } from './snake';
+import * as d3 from 'd3';
+import * as cola from 'webcola';
+import { calculateQ, sleep, atoi } from './utilities';
 
 const neataptic = require('neataptic');
-const d3 = require('d3');
+const { Neat, architect, methods } = neataptic;
 
-const { Neat } = neataptic;
-const Methods = neataptic.methods;
-const Architect = neataptic.architect;
+interface IGraphLineItem {
+  score: number;
+  generation: number;
+}
 
-// Global vars
-let neat: any;
-let snakes: Snake[];
-let generationLog: any;
-let generationTimeLog: any;
-let iterationCounter: number;
-const mutationRate = 0.3;
-const inputSize = 6;
-const startHiddenSize = 2;
-const outputSize = 3;
+export interface IGenerationLogItem {
+  score: number;
+  generation: number;
+  top: boolean;
+}
+
+export interface IGraphProps {
+  containerName: string;    
+  generationLog: IGenerationLogItem[][];
+}
 
 export interface IConfig {  
   populationSize: number;
@@ -38,183 +42,41 @@ class Manager {
   started: boolean;
   paused: boolean;
   config: IConfig;
+  neat: any;
+  snakes: Snake[];
+  generationLog: IGenerationLogItem[][];
+  generationTimeLog: any;
+  iterationCounter: number;
+  mutationRate: number;
+  inputSize: number;
+  startHiddenSize: number;
+  outputSize: number;
   constructor(config: IConfig) {
     this.started = false;
     this.paused = false;
     this.config = config;
-  }
-  sleep(ms: number) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    this.snakes = [];
+    this.generationLog = [];
+    this.generationTimeLog = [];
+    this.iterationCounter = 0;
+    this.inputSize = 6;
+    this.startHiddenSize = 1;
+    this.outputSize = 3;
+    this.mutationRate = 0.3;
   }
 
-  start() {
-    snakes = [];
-    generationLog = [];
-    generationTimeLog = [];
-    iterationCounter = 0;
-    /** Construct the genetic algorithm */
-    neat = new Neat(inputSize, outputSize, null, {
-      mutation: [
-        Methods.mutation.ADD_NODE,
-        Methods.mutation.SUB_NODE,
-        Methods.mutation.ADD_CONN,
-        Methods.mutation.SUB_CONN,
-        Methods.mutation.MOD_WEIGHT,
-        Methods.mutation.MOD_BIAS,
-        Methods.mutation.MOD_ACTIVATION,
-        Methods.mutation.ADD_GATE,
-        Methods.mutation.SUB_GATE,
-        Methods.mutation.ADD_SELF_CONN,
-        Methods.mutation.SUB_SELF_CONN,
-        Methods.mutation.ADD_BACK_CONN,
-        Methods.mutation.SUB_BACK_CONN
-      ],
-      popsize: this.config.populationSize,
-      mutationRate,
-      elitism: Math.round(
-        this.config.elitismPercent / 100 * this.config.populationSize
-      ),
-      network: new Architect.Random(inputSize, startHiddenSize, outputSize)
-    });
+  start() {    
+    this.initNN();
 
-    neat.population.forEach((genome: any) => {
-      // let genome = neat.population[i];
-      snakes.push(new Snake(genome, this.config));
+    this.neat.population.forEach((genome: any, i: number) => {
+      this.snakes.push(new Snake(genome, this.config, i));
     });
     this.started = true;
     this.paused = false;
-
-    document.addEventListener('click', e => {
-      let canvasId = String((<HTMLCanvasElement> e.target).id.indexOf('snake-canvas'));
-      if (canvasId !== '-1') {
-        // const { target } = evt;        
-        const selectedSnake = snakes[String(canvasId).substr(canvasId.length - 1)];
-        this.drawGraph(selectedSnake.brain.graph(400, 400), '.draw');
-        // console.log(selectedSnake.brain.graph(400, 400);
-      }
-    });
-
+    this.handleSnakeClick();
     setTimeout(() => { d3.select('#gen').html('1'); }, 10);
     this.tick();
-  }
-
-  updateSettings(newConfig: IConfig) {
-    this.config = newConfig;
-    if (snakes) {
-      snakes.forEach(snake => Object.assign(snake.config, newConfig));
-    }
-  }
-
-  async tick() {
-    const sleepTime = this.config.gameSpeedUp === true ? 1 : 50;
-    const that = this;
-    let i;
-    await this.sleep(sleepTime);
-    if (!this.started || this.paused) { return; }
-    iterationCounter += 1;
-    // clone snakes so we don't mess with the originals
-    const clonedSnakes = JSON.parse(JSON.stringify(snakes));
-    clonedSnakes.forEach((clonedSnake: ISnake, j: number) => {
-      clonedSnake.index = j;
-    });
-    clonedSnakes.sort((a: ISnake, b: ISnake) => {
-      if (a.firstAttemptScore > b.firstAttemptScore) { return -1; }
-      if (a.firstAttemptScore < b.firstAttemptScore) { return 1; }
-      return 0;
-    });
-
-    // check out many have never died
-    // check to see if everyone is either dead or performing negatively
-    let hasEveryoneDied = true;
-    let areAllAliveSnakesNegative = true;
-
-    for (i in snakes) {
-      if (snakes[i].deaths === 0) {
-        hasEveryoneDied = false;
-        if (snakes[i].currentScore > 0) {
-          areAllAliveSnakesNegative = false;
-        }
-      }
-    }
-
-    if (!hasEveryoneDied) {
-      if (iterationCounter > 10 && areAllAliveSnakesNegative) {
-        hasEveryoneDied = true;
-      }
-    }
-
-    if (hasEveryoneDied) {
-      const newLog: { score: any; generation: any; top: boolean; }[] = [];
-      clonedSnakes.forEach((clonedSnake: ISnake, j: number) => {
-        let top = false;
-        let canvasCtx = (<HTMLCanvasElement> document.getElementById(`snake-canvas-${clonedSnake.index}`))
-                        .getContext('2d');
-        if (j < this.config.populationSize * this.config.elitismPercent / 100) {
-          snakes[clonedSnake.index].bragCanvas(canvasCtx!);
-          top = true;
-        } else {
-          snakes[clonedSnake.index].hideCanvas(canvasCtx!);
-        }
-        newLog.push({
-          score: clonedSnake.firstAttemptScore,
-          generation: generationLog.length,
-          top
-        });
-      });
-
-      generationLog.push(newLog);
-      generationTimeLog.push({
-        index: generationTimeLog.length
-      });
-      this.drawHistoryGraph();
-      setTimeout(() => { that.breed(); }, 1000);
-    } else {
-      setTimeout(() => {
-        snakes.forEach((snake, j) => {
-          snake.look();
-          let canvasCtx = (<HTMLCanvasElement> document.getElementById(`snake-canvas-${j}`))
-                        .getContext('2d');
-          snake.showCanvas(canvasCtx!);
-          snake.moveCanvas(canvasCtx!);
-        });
-        that.tick();
-        // https://github.com/palantir/tslint/issues/742
-        // tslint:disable-next-line:align 
-        }, 1);
-    }
-  }
-
-  breed() {
-    neat.sort();
-    const newPopulation = [];
-    let i;
-
-    // Elitism
-    for (i = 0; i < neat.elitism; i += 1) {
-      newPopulation.push(neat.population[i]);
-    }
-
-    // Breed the next individuals
-    for (i = 0; i < neat.popsize - neat.elitism; i += 1) {
-      newPopulation.push(neat.getOffspring());
-    }
-
-    // Replace the old population with the new population
-    neat.population = newPopulation;
-    neat.mutate();
-    neat.generation += 1;
-    d3.select('#gen').html(neat.generation + 1);
-    snakes = [];
-
-    neat.population.forEach((_snake: ISnake, j: number) => {
-      const newGenome = neat.population[j];      
-      snakes.push(new Snake(newGenome, this.config));
-      // snakes.push(snake);
-    });
-
-    iterationCounter = 0;
-    this.tick();
-  }
+  }  
 
   stop() {
     this.started = false;
@@ -230,7 +92,156 @@ class Manager {
     this.tick();
   }
 
-  drawHistoryGraph() {
+  updateSettings(newConfig: IConfig) {
+    this.config = newConfig;
+    if (this.snakes) {
+      this.snakes.forEach(snake => Object.assign(snake.config, newConfig));
+    }
+  }
+
+  private initNN() {
+    this.neat = new Neat(this.inputSize, this.outputSize, null, {
+      mutation: [
+        methods.mutation.ADD_NODE,
+        methods.mutation.SUB_NODE,
+        methods.mutation.ADD_CONN,
+        methods.mutation.SUB_CONN,
+        methods.mutation.MOD_WEIGHT,
+        methods.mutation.MOD_BIAS,
+        methods.mutation.MOD_ACTIVATION,
+        methods.mutation.ADD_GATE,
+        methods.mutation.SUB_GATE,
+        methods.mutation.ADD_SELF_CONN,
+        methods.mutation.SUB_SELF_CONN,
+        methods.mutation.ADD_BACK_CONN,
+        methods.mutation.SUB_BACK_CONN
+      ],
+      popsize: this.config.populationSize,
+      murationRate: this.mutationRate,
+      elitism: Math.round(this.config.elitismPercent / 100 * this.config.populationSize),
+      network: new architect.Random(this.inputSize, this.startHiddenSize, this.outputSize)
+    });
+  }
+
+  private async tick() {
+    if (!this.started || this.paused) { return; }
+
+    const sleepTime = this.config.gameSpeedUp === true ? 1 : 50;    
+    await sleep(sleepTime);
+    const that = this;
+    let hasEveryoneDied = true;
+    let areAllAliveSnakesNegative = true;
+    
+    this.iterationCounter++;
+    // clone snakes so we don't mess with the originals
+    const clonedSnakes = JSON.parse(JSON.stringify(this.snakes));
+    this.sortSnakes(clonedSnakes);
+
+    ({ hasEveryoneDied, areAllAliveSnakesNegative } = 
+      this.checkHasEveryoneDied(hasEveryoneDied, areAllAliveSnakesNegative));
+
+    if (hasEveryoneDied) {
+      const newLog: IGenerationLogItem[] = this.getCurrentGenerationLog(clonedSnakes);
+      this.generationLog.push(newLog);
+      this.generationTimeLog.push({
+        index: this.generationTimeLog.length
+      });
+      this.drawHistoryGraph();
+      setTimeout(() => { that.breed(); }, 1000);
+    } else {
+      setTimeout(() => {
+        this.snakes.forEach((snake, _j) => {
+          snake.look();
+          snake.showCanvas();
+          snake.moveCanvas();
+        }); // tslint:disable-next-line:align
+        that.tick(); }, 1);
+    }
+  }
+
+  private getCurrentGenerationLog(clonedSnakes: any) {
+    let generationLog: IGenerationLogItem[] = [];
+    clonedSnakes.forEach((clonedSnake: ISnake, j: number) => {
+      let top = false;
+      if (j < this.config.populationSize * this.config.elitismPercent / 100) {
+        this.snakes[clonedSnake.index].bragCanvas();
+        top = true;
+      } else {
+        this.snakes[clonedSnake.index].hideCanvas();
+      }
+      generationLog.push({
+        score: clonedSnake.firstAttemptScore,
+        generation: this.generationLog.length,
+        top
+      });
+    });
+    return generationLog;
+  }
+
+  private checkHasEveryoneDied(hasEveryoneDied: boolean, areAllAliveSnakesNegative: boolean) {
+    for (let i in this.snakes) {
+      if (this.snakes[i].deaths === 0) {
+        hasEveryoneDied = false;
+        if (this.snakes[i].currentScore > 0) {
+          areAllAliveSnakesNegative = false;
+        }
+      }
+    }
+    if (!hasEveryoneDied) {
+      if (this.iterationCounter > 10 && areAllAliveSnakesNegative) {
+        hasEveryoneDied = true;
+      }
+    }
+    return { hasEveryoneDied, areAllAliveSnakesNegative };
+  }
+
+  private sortSnakes(clonedSnakes: any) {
+    clonedSnakes.forEach((clonedSnake: ISnake, j: number) => {
+      clonedSnake.index = j;
+    });
+    clonedSnakes.sort((a: ISnake, b: ISnake) => {
+      if (a.firstAttemptScore > b.firstAttemptScore) {
+        return -1;
+      }
+      if (a.firstAttemptScore < b.firstAttemptScore) {
+        return 1;
+      }
+      return 0;
+    });
+  }
+
+  private breed() {
+    this.neat.sort();
+    const newPopulation = [];
+    let i;
+
+    // Elitism
+    for (i = 0; i < this.neat.elitism; i++) {
+      newPopulation.push(this.neat.population[i]);
+    }
+
+    // Breed the next individuals
+    for (i = 0; i < this.neat.popsize - this.neat.elitism; i++) {
+      newPopulation.push(this.neat.getOffspring());
+    }
+
+    // Replace the old population with the new population
+    this.neat.population = newPopulation;
+    this.neat.mutate();
+    this.neat.generation++;
+    d3.select('#gen').html(this.neat.generation + 1);
+    this.snakes = [];
+
+    this.neat.population.forEach((_snake: ISnake, j: number) => {
+      const newGenome = this.neat.population[j];      
+      this.snakes.push(new Snake(newGenome, this.config, j));
+    });
+
+    this.iterationCounter = 0;
+    this.tick();
+  }
+
+  private drawHistoryGraph() {
     d3
       .select('#graph')
       .selectAll('svg')
@@ -251,7 +262,7 @@ class Manager {
       bottom: 20
     };
 
-    const xMax = generationLog.length - 1 > 10 ? generationLog.length - 1 : 10;
+    const xMax = this.generationLog.length - 1 > 10 ? this.generationLog.length - 1 : 10;
 
     const xScale = d3
       .scaleLinear()
@@ -259,8 +270,8 @@ class Manager {
       .range([pad.left + 10, width - pad.right - 10])
       .nice();
 
-    const minScore = d3.min(generationLog, (d: any) => d3.min(d, (e: any) => e.score)) || -10;
-    const maxScore = d3.max(generationLog, (d: any) => d3.max(d, (e: any) => e.score)) || 10;
+    const minScore = atoi(d3.min(this.generationLog, (d: any) => d3.min(d, (e: any) => e.score))!) || -10;
+    const maxScore = atoi(d3.max(this.generationLog, (d: any) => d3.max(d, (e: any) => e.score))!) || 10;
 
     const yScale = d3
       .scaleLinear()
@@ -282,7 +293,7 @@ class Manager {
 
     const genSvg = svg
       .selectAll('generation')
-      .data(generationLog)
+      .data(this.generationLog)
       .enter()
       .append('g');
 
@@ -305,34 +316,35 @@ class Manager {
         return '#000';
       });
 
-    const medianLine = [];
-    const q1Line = [];
-    const q3Line = [];
+    const medianLine: IGraphLineItem[] = [];
+    const q1Line: IGraphLineItem[] = [];
+    const q3Line: IGraphLineItem[] = [];
 
-    for (let i = 0; i < generationLog.length; i += 1) {
+    for (let i = 0; i < this.generationLog.length; i++) {
+      const genLog = this.generationLog[i];
       medianLine.push({
-        score: calculateQ(generationLog[i], 0.5),
-        generation: parseInt(String(i), 10)
+        score: calculateQ(genLog, 0.5),
+        generation: i
       });
       q1Line.push({
-        score: calculateQ(generationLog[i], 0.25),
-        generation: parseInt(String(i), 10)
+        score: calculateQ(genLog, 0.25),
+        generation: i
       });
       q3Line.push({
-        score: calculateQ(generationLog[i], 0.75),
-        generation: parseInt(String(i), 10)
+        score: calculateQ(genLog, 0.75),
+        generation: i
       });
     }
 
     const lineFunction = d3
-      .line()
-      .x((d: any) => xScale(d.generation))
-      .y((d: any) => yScale(d.score))
+      .line<IGraphLineItem>()
+      .x((d: IGraphLineItem) => xScale(d.generation))
+      .y((d: IGraphLineItem) => yScale(d.score))
       .curve(d3.curveCardinal);
 
     svg
       .append('path')
-      .attr('d', lineFunction(medianLine))
+      .attr('d', lineFunction(medianLine)!)
       .attr('stroke', '#000')
       .attr('stroke-width', 4)
       .attr('fill', 'none')
@@ -340,7 +352,7 @@ class Manager {
 
     svg
       .append('path')
-      .attr('d', lineFunction(q1Line))
+      .attr('d', lineFunction(q1Line)!)
       .attr('stroke', '#000')
       .attr('stroke-width', 1)
       .attr('stroke-dasharray', '5,5')
@@ -349,7 +361,7 @@ class Manager {
 
     svg
       .append('path')
-      .attr('d', lineFunction(q3Line))
+      .attr('d', lineFunction(q3Line)!)
       .attr('stroke', '#000')
       .attr('stroke-width', 1)
       .attr('stroke-dasharray', '5,5')
@@ -376,16 +388,16 @@ class Manager {
       .attr('opacity', 0.5);
   }
 
-  drawGraph(graph: any, panel: string) {
+  private drawGraph(graph: any, panel: string) {
     const NODE_RADIUS = 7;
     const GATE_RADIUS = 2;
-    const REPEL_FORCE = 0;
+    const REPEL_FORCE = -5;
     const LINK_DISTANCE = 100;
     const WIDTH = 1000;
     const HEIGHT = 500;
 
-    const d3cola = (<any> window).cola
-      .d3adaptor()
+    const d3cola = cola
+      .d3adaptor(d3)
       .avoidOverlaps(true)
       .size([WIDTH, HEIGHT]);
 
@@ -406,6 +418,10 @@ class Manager {
       .append('svg:path')
       .attr('d', 'M0,-5L10,0L0,5');
 
+    graph.nodes.forEach(function(v: any) {
+      v.height = v.width = 2 * (v.name === 'GATE' ? GATE_RADIUS : NODE_RADIUS); }
+    );
+  
     graph.nodes.forEach((v: any) => {
       v.height = 2 * (v.name === 'GATE' ? GATE_RADIUS : NODE_RADIUS);
       v.width = v.height;
@@ -440,8 +456,9 @@ class Manager {
       .enter()
       .append('circle')
       .attr('class', (d: any) => `node ${d.name}`)
-      .attr('r', (d: any) => (d.name === 'GATE' ? GATE_RADIUS : NODE_RADIUS));
-    // .call(d3cola.drag);
+      .attr('r', (d: any) => (d.name === 'GATE' ? GATE_RADIUS : NODE_RADIUS))
+      .on('click', function (d: any) { d.fixed = true; })
+      .call(d3cola.drag);
 
     node.append('title').text((d: any) => {
       let text = '';
@@ -457,25 +474,26 @@ class Manager {
       .enter()
       .append('text')
       .attr('class', 'label')
-      .text((d: any) => `(${d.index}) ${d.name}`);
-    // .call(d3cola.drag);
+      .text((d: any) => `(${d.index}) ${d.name}`)
+      .on('click', function (d: any) { d.fixed = true; })
+      .call(d3cola.drag);
 
     d3cola.on('tick', () => {
       // draw directed edges with proper padding from node centers
       path.attr('d', (d: any) => {
-        const deltaX = d.target.x - d.source.x;
-        const deltaY = d.target.y - d.source.y;
-        const dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+        let deltaX = d.target.x - d.source.x;
+        let deltaY = d.target.y - d.source.y;
+        let dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
         let normX = deltaX / dist;
         let normY = deltaY / dist;
 
         if (isNaN(normX)) { normX = 0; }
         if (isNaN(normY)) { normY = 0; }
 
-        const sourcePadding = d.source.width / 2;
-        const targetPadding = d.target.width / 2 + 2;
-        const sourceX = d.source.x + sourcePadding * normX;
-        const sourceY = d.source.y + sourcePadding * normY;
+        let sourcePadding = d.source.width / 2;
+        let targetPadding = d.target.width / 2 + 2;
+        let sourceX = d.source.x + sourcePadding * normX;
+        let sourceY = d.source.y + sourcePadding * normY;
         let targetX = d.target.x - targetPadding * normX;
         let targetY = d.target.y - targetPadding * normY;
 
@@ -488,34 +506,45 @@ class Manager {
 
         // Self edge.
         if (d.source.x === d.target.x && d.source.y === d.target.y) {
+          drx = dist;
+          dry = dist;
           xRotation = -45;
           largeArc = 1;
           drx = 20;
           dry = 20;
-          targetX += 1;
-          targetY += 1;
+          targetX = targetX + 1;
+          targetY = targetY + 1;
         }
         return `M${sourceX},${sourceY}A${drx},${dry} ${xRotation},${largeArc},${sweep} ${targetX},${targetY}`;
       });
+      
+      node
+      .attr('cx', function (d: any) {
+        return d.x;
+      })
+      .attr('cy', function (d: any) {
+        return d.y;
+      });
 
-      node.attr('cx', (d: any) => d.x).attr('cy', (d: any) => d.y);
-      label.attr('x', (d: any) => d.x + 10).attr('y', (d: any) => d.y - 10);
+      label
+      .attr('x', function (d: any) {
+        return d.x + 10;
+      })
+      .attr('y', function (d: any) {
+        return d.y - 10;
+      });
     });
   }
-}
 
-function calculateQ(values: any, Q: number) {
-  values.sort((a: any, b: any) => a.score - b.score);
-
-  if (values.length === 0) { return 0; }
-
-  const index = Math.floor(values.length * Q);
-
-  if (values.length % 2) {
-    return values[index].score;
+  private handleSnakeClick() {
+    document.addEventListener('click', e => {
+      let canvasId = String((<HTMLCanvasElement> e.target).id.indexOf('snake-canvas'));
+      if (canvasId !== '-1') {
+        const selectedSnake = this.snakes[canvasId.substr(canvasId.length - 1)];
+        this.drawGraph(selectedSnake.brain.graph(400, 400), '.draw');
+      }
+    });
   }
-  if (index - 1 < 0) { return 0; }
-  return (values[index - 1].score + values[index].score) / 2.0;
 }
 
 export default Manager;
