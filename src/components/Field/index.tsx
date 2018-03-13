@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import '../styles/field.css';
+import '../../styles/field.css';
 
 export interface IFieldProps {
   name: string;
@@ -104,32 +104,10 @@ class Field extends Component<IFieldProps, IFieldState> {
 
   render() {
     var that = this;
-    // var props = this.props;
-
     function getErrors() {
 
       if (that.state.serverErrors && that.state.value === that.state.valueOnMount) { return that.state.serverErrors; }
       if (!that.state.touched && that.state.value === '' && that.state.changeCounter === 0) { return; }
-
-      // var v = that.state.value || '';
-
-      // if (props.maxLength !== undefined) {
-      //   if (v.length > props.maxLength) {
-      //     return 'Too long: ' + v.length + '/' + props.maxLength;
-      //   }
-      // }
-
-      // if (that.state.blurCounter > 0) {
-      //   // check length
-      //   if (props.minLength !== undefined) {
-      //     if (v.length < props.minLength) {
-      //       return 'Must be at least ' + props.minLength + ' characters.';
-      //     }
-      //   }
-      //   if (v === '' && props.required) {
-      //     return 'Required.';
-      //   }
-      // }
     }
 
     var err = getErrors();

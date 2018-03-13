@@ -92,7 +92,7 @@
       true,
       "always"
     ],
-    "switch-default": true,
+    "switch-default": false,
     "trailing-comma": [
       false
     ],

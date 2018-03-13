@@ -2,6 +2,7 @@ import Snake, { ISnake } from './snake';
 import * as d3 from 'd3';
 import * as cola from 'webcola';
 import { calculateQ, sleep, atoi } from './utilities';
+import { IStoreState } from '../types';
 
 const neataptic = require('neataptic');
 const { Neat, architect, methods } = neataptic;
@@ -17,31 +18,10 @@ export interface IGenerationLogItem {
   top: boolean;
 }
 
-export interface IGraphProps {
-  containerName: string;    
-  generationLog: IGenerationLogItem[][];
-}
-
-export interface IConfig {  
-  populationSize: number;
-  elitismPercent: number;
-  initialSnakeLength: number; 
-  displaySize: number;
-  gridResolution: number;
-  growWhenEating: boolean;
-  canEatSelf: boolean; 
-  borderWalls: boolean;
-  gameSpeedUp: boolean;
-  running: boolean;
-  paused: boolean;
-  moveTowardsScore: number;
-  moveAwayScore: number;
-  foodScore: number;  
-}
 class Manager {
   started: boolean;
   paused: boolean;
-  config: IConfig;
+  config: IStoreState;
   neat: any;
   snakes: Snake[];
   generationLog: IGenerationLogItem[][];
@@ -51,7 +31,7 @@ class Manager {
   inputSize: number;
   startHiddenSize: number;
   outputSize: number;
-  constructor(config: IConfig) {
+  constructor(config: IStoreState) {
     this.started = false;
     this.paused = false;
     this.config = config;
@@ -92,7 +72,7 @@ class Manager {
     this.tick();
   }
 
-  updateSettings(newConfig: IConfig) {
+  updateSettings(newConfig: IStoreState) {
     this.config = newConfig;
     if (this.snakes) {
       this.snakes.forEach(snake => Object.assign(snake.config, newConfig));

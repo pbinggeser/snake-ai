@@ -1,3 +1,4 @@
+/* having many problems extracting graph as a component by itself currently. KIV */
 import React, { Component } from 'react';
 import d3 from 'd3';
 

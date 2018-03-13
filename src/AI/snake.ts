@@ -1,5 +1,5 @@
-import { IConfig } from './manager';
 import { getFontSize, angleToPoint, radiansToDegrees, distance, atoi } from './utilities';
+import { IStoreState } from '../types';
 
 export interface ISnake {
   key: string;
@@ -53,7 +53,7 @@ class Snake {
   brain: IBrain;
   canvasContext: CanvasRenderingContext2D;
   
-  constructor(brain: any, config: IConfig, index: number) {
+  constructor(brain: any, config: IStoreState, index: number) {
     this.state = {};
     this.config = config;
     this.brain = brain;
@@ -68,7 +68,7 @@ class Snake {
     this.highScore = 0;
     this.gamesPlayed = -1;
     
-    this.restart();    
+    this.restart();
     this.direction = 0;
     this.turnAngle = 90;
     this.makeFood();
