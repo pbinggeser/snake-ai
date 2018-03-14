@@ -1,21 +1,14 @@
-import * as constants from '../constants';
+export * from './toggleGrowWhenEat';
+export * from './toggleHighSpeed';
+export * from './toggleHitSelf';
+export * from './toggleHitWall';
+export * from './updatePopulationField';
+export * from './elitismPercent';
 
-export interface IToggleHitWall {
-    type: constants.TOGGLE_DIES_WHEN_HIT_WALL;
-}
+// import * as toggleGrowWhenEat from './toggleGrowWhenEat';
+// import * as toggleHighSpeed from './toggleHighSpeed';
+// import * as toggleHitSelf from './toggleHitSelf';
+// import * as toggleHitWall from './toggleHitWall';
+// import * as updatePopulationField from './updatePopulationField';
 
-export function toggleHitWall(): IToggleHitWall {
-    return {
-        type: constants.TOGGLE_DIES_WHEN_HIT_WALL
-    };
-}
-
-export interface IToggleEatSelf {
-    type: constants.TOGGLE_DIES_WHEN_EAT_SELF;
-}
-
-export function toggleEatSelf(): IToggleEatSelf {
-    return {
-        type: constants.TOGGLE_DIES_WHEN_EAT_SELF
-    };
-}
+// export { toggleGrowWhenEat, toggleHighSpeed, toggleHitSelf, toggleHitWall, updatePopulationField};

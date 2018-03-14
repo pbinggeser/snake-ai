@@ -1,19 +1,15 @@
 import { IToggleHitWall } from '../actions';
 import { ISwitchState } from '../types/index';
-import { TOGGLE_DIES_WHEN_HIT_WALL } from '../constants/index';
+import * as constants from '../constants/index';
 import initialState from './initialState';
+import { spliceStateForSwitch } from './rootReducers';
 
-function toggleBorderWalls (state: ISwitchState) {
-    var newState = Object.assign({}, state);
-    newState.value = !newState.value;
-    return newState;
-}
-
-export default function hitWallReducer(state: ISwitchState = initialState.borderWallSwitch,
-                                       action: IToggleHitWall): ISwitchState {
+const hitWallReducer = (state: ISwitchState = initialState.hitWallReducer, action: IToggleHitWall): ISwitchState => {
     switch (action.type) {
-        case TOGGLE_DIES_WHEN_HIT_WALL:
-            return toggleBorderWalls(state);
+        case constants.TOGGLE_DIES_WHEN_HIT_WALL:
+        return spliceStateForSwitch(state);
     }
     return state;
-}
+};
+
+export default hitWallReducer;

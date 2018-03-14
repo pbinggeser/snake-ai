@@ -13,6 +13,7 @@ Original project by [Peter Binggeser](https://github.com/pbinggeser) didn't have
 - [x] [TSLint](https://palantir.github.io/tslint/)
 - [x] [Github pages](https://pages.github.com/)
 - [ ] Redux
+- [ ] FPS counter
 - [ ] [HOCs](https://reactjs.org/docs/higher-order-components.html)
 - [ ] Material-Ui
 - [ ] Machine learning - This project uses [neataptic](https://github.com/wagenaartje/neataptic)

@@ -4,39 +4,23 @@ import { IStoreState } from './types/index';
 import { Provider } from 'react-redux';
 import Manager from './AI/manager';
 import Field from './components/Field';
-import BorderWallSwitch from './containers/BorderWallSwitch';
-import EatSelfSwitch from './containers/EatSelfSwitch';
 import './styles/App.css';
 import configureStore from './store/configureStore';
 
-const configuredStore = configureStore();
+import BorderWallSwitch from './containers/BorderWallSwitch';
+import EatSelfSwitch from './containers/EatSelfSwitch';
+import GrowWhenEatingSwitch from './containers/GrowWhenEatingSwitch';
+import HighSpeedSwitch from './containers/HighSpeedSwitch';
+import initialState from './reducers/initialState';
+import PopulationField from './containers/PopulationField';
+import ElitismPercentField from './containers/ElitismPercentField';
+
+const configuredStore = configureStore(initialState);
 class App extends Component<{}, IStoreState> {
     manager: Manager;
     constructor(props: any) {
       super(props);     
-      this.state = { // todo take these all away and use redux..
-        populationSize: 50,
-        elitismPercent: 10,
-        foodScore: 25, // 10
-        moveTowardsScore: 2,
-        moveAwayScore: -3, // -1.5
-        initialSnakeLength: 4,        
-        growWhenEating: true,
-        gameSpeedUp: false,
-        displaySize: 100,
-        gridResolution: 20,
-        running: false,
-        paused: false,
-        snakes: [],
-        borderWallSwitch: {
-          label: 'Snake dies when it hits a wall.',
-          value: true
-        },
-        eatSelfSwitch: {
-          label: 'Snake dies when it his itself.',
-          value: true
-        }
-      };
+      this.state = initialState;
       this.manager = new Manager(this.state);
       this.start = this.start.bind(this);
       this.pause = this.pause.bind(this);
@@ -74,10 +58,8 @@ class App extends Component<{}, IStoreState> {
     }
   
     render() {
-      var that = this;
-  
-      this.manager.updateSettings(this.state);
-  
+      var that = this;  
+      this.manager.updateSettings(this.state);  
       var canvases = [];
       for (var i = 0; i < this.state.populationSize; i++) {
         canvases.push(i);
@@ -116,44 +98,32 @@ class App extends Component<{}, IStoreState> {
             ) : (
                 ''
               )}
-  
-            <Field
-              type="number"
-              name="populationSize"
-              placeholder="Population Size"
-              required={true}
-              value={this.state.populationSize}
-              onChangeEvent={v => {
-                that.setState({ populationSize: v });
-              }}
-              disabled={this.state.running}
-              description="How many neural nets per generation?"
-              min={2}
-            />
-            <Field
+            <PopulationField />
+            <ElitismPercentField />
+            {/* <Field
               type="number"
               name="elitismPercent"
               placeholder="Elitism Percent"
               required={true}
               value={this.state.elitismPercent}
-              onChangeEvent={v => {
-                that.setState({ elitismPercent: v });
-              }}
+              // onChangeEvent={v => {
+              //   that.setState({ elitismPercent: v });
+              // }}
               disabled={this.state.running}
               description="% of top performers to use for the next generation."
               min={1}
               max={100}
               step={1}
-            />
+            /> */}
             <Field
               type="number"
               name="foodScore"
               placeholder="Eat Food Score"
               required={true}
               value={this.state.foodScore}
-              onChangeEvent={v => {
-                that.setState({ foodScore: v });
-              }}
+              // onChangeEvent={v => {
+              //   that.setState({ foodScore: v });
+              // }}
               description="Awarded for eating food."
               step={1}
             />
@@ -163,9 +133,9 @@ class App extends Component<{}, IStoreState> {
               placeholder="Move Towards Food Score"
               required={true}
               value={this.state.moveTowardsScore}
-              onChangeEvent={v => {
-                that.setState({ moveTowardsScore: v });
-              }}
+              // onChangeEvent={v => {
+              //   that.setState({ moveTowardsScore: v });
+              // }}
               description="Awarded for each step towards food."
               step={0.5}
             />
@@ -175,9 +145,9 @@ class App extends Component<{}, IStoreState> {
               placeholder="Move Away Food Score"
               required={true}
               value={this.state.moveAwayScore}
-              onChangeEvent={v => {
-                that.setState({ moveAwayScore: v });
-              }}
+              // onChangeEvent={v => {
+              //   that.setState({ moveAwayScore: v });
+              // }}
               description="Awarded for each step away from food."
               step={0.5}
             />
@@ -187,9 +157,9 @@ class App extends Component<{}, IStoreState> {
               placeholder="Snake Starting Length"
               required={true}
               value={this.state.initialSnakeLength}
-              onChangeEvent={v => {
-                that.setState({ initialSnakeLength: v });
-              }}
+              // onChangeEvent={v => {
+              //   that.setState({ initialSnakeLength: v });
+              // }}
               description="Measured in grid cells."
               min={1}
               step={1}
@@ -201,9 +171,9 @@ class App extends Component<{}, IStoreState> {
               placeholder="Grid Resolution"
               required={true}
               value={this.state.gridResolution}
-              onChangeEvent={v => {
-                that.setState({ gridResolution: v });
-              }}
+              // onChangeEvent={v => {
+              //   that.setState({ gridResolution: v });
+              // }}
               description="Resolution of each Snake's grid environment."
               min={5}
               step={1}
@@ -214,30 +184,17 @@ class App extends Component<{}, IStoreState> {
               placeholder="Display Size"
               required={true}
               value={this.state.displaySize}
-              onChangeEvent={v => {
-                that.setState({ displaySize: v });
-              }}
+              // onChangeEvent={v => {
+              //   that.setState({ displaySize: v });
+              // }}
               description="Does not affect game-play."
               min={10}
               step={1}
             />
             <BorderWallSwitch />
             <EatSelfSwitch />
-            {/*           
-            <Switch
-              value={this.state.growWhenEating}
-              label="Snake grows longer when it eats."
-              onToggle={() => {
-                that.setState({ growWhenEating: !that.state.growWhenEating });
-              }}
-            />
-            <Switch
-              value={this.state.gameSpeedUp}
-              label="Runs with high speed."
-              onToggle={() => {
-                that.setState({ gameSpeedUp: !that.state.gameSpeedUp });
-              }}
-            /> */}
+            <GrowWhenEatingSwitch/>
+            <HighSpeedSwitch/>
           </div>
           <div className="description">
             <h3 style={{ marginBottom: 10, marginTop: 0 }}>
@@ -254,7 +211,6 @@ class App extends Component<{}, IStoreState> {
                 return (
                   <div className="grid-item" key={j}>
                     <canvas
-                      // name={'snake-canvas'}
                       id={'snake-canvas-' + j}
                       width={that.state.displaySize + 'px'}
                       height={that.state.displaySize + 'px'}
@@ -299,8 +255,8 @@ class App extends Component<{}, IStoreState> {
   }
 
 ReactDOM.render(
-    <Provider store={configuredStore}>
-        <App />
-    </Provider>,
-    document.getElementById('root')
+  <Provider store={configuredStore}>
+      <App />
+  </Provider>,
+  document.getElementById('root')
 );

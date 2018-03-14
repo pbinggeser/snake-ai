@@ -1,15 +1,16 @@
-import { createStore } from 'redux';
+import { createStore, Store, applyMiddleware } from 'redux';
 import { IStoreState } from '../types';
-import initialState from '../reducers/initialState';
 import rootReducer from '../reducers/rootReducers';
+import { composeWithDevTools } from 'redux-devtools-extension';
 
-// tslint:disable-next-line:no-string-literal
-let devtools: any = window['devToolsExtension'] ? window['devToolsExtension']() : (f: any) => f;
-
-export default function configureStore() {
+const configureStore = (initialState: IStoreState): Store<IStoreState> => {
+  const composeEnhancers = composeWithDevTools({});
   return createStore<IStoreState>(
     rootReducer,
     initialState,
-    devtools
+    composeEnhancers(applyMiddleware(    
+    )),
   );
-}
+};
+
+export default configureStore;

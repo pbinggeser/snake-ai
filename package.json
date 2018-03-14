@@ -32,8 +32,10 @@
     "gh-pages": "^1.0.0",
     "react-app-rewired": "^1.4.1",
     "react-scripts-ts": "^2.13.0",
+    "redux-devtools-extension": "^2.13.2",
     "tslint": "^5.9.1",
-    "typescript": "^2.7.2"
+    "typescript": "^2.7.2",
+    "webpack-bundle-analyzer": "^2.11.1"
   },
   "scripts": {
     "build-css": "node-sass-chokidar src/ -o src/",

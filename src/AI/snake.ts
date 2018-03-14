@@ -49,7 +49,7 @@ class Snake {
   lastDirection?: number;
   lastDistance: number;
   state: any;
-  config: any;
+  config: IStoreState;
   brain: IBrain;
   canvasContext: CanvasRenderingContext2D;
   
@@ -103,7 +103,7 @@ class Snake {
     this.getBestDirectionFromNN();
     this.setNewSnakeHead(head, this.direction);
 
-    if (this.config.borderWalls) {
+    if (this.config.hitWallReducer.value) {
       if (head.x < 0 || head.x >= this.config.gridResolution) {
         died = true;
       }
@@ -118,7 +118,7 @@ class Snake {
     }
 
     // snakes hit themselves
-    if (this.state.body.length > 1 && this.config.canEatSelf) {
+    if (this.state.body.length > 1 && this.config.eatSelfReducer.value) {
       for (let i = 2; i < this.state.body.length; i++) {
         if (head.x === this.state.body[i].x && head.y === this.state.body[i].y) {
           died = true;
@@ -139,7 +139,7 @@ class Snake {
       // add 1 square to the "front" of the snake
       this.state.body.unshift(head);
       // remove 1 square from "end" of the snake if user select "grow when eating"
-      if (!eating || !this.config.growWhenEating) {
+      if (!eating || !this.config.growWhenEatReducer.value) {
         this.state.body.pop();
       }
       // calculate whether snake is moving towards/away from food

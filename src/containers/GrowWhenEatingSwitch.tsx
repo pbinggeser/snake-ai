@@ -5,8 +5,8 @@ import { IStoreState } from '../types';
 
 const mapStateToProps = (state: IStoreState) => {
     return {
-        label: state.eatSelfReducer.label,
-        value: state.eatSelfReducer.value
+        label: state.growWhenEatReducer.label,
+        value: state.growWhenEatReducer.value
     };
 };
 

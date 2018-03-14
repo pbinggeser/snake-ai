@@ -1,18 +1,17 @@
 import Switch from '../components/Switch';
 import * as actions from '../actions/';
-import { connect, Dispatch } from 'react-redux';
+import { connect } from 'react-redux';
 import { IStoreState } from '../types';
 
 const mapStateToProps = (state: IStoreState) => {
     return {
-        label: state.borderWallSwitch.label,
-        value: state.borderWallSwitch.value
+        label: state.hitWallReducer.label,
+        value: state.hitWallReducer.value
     };
 };
 
-const mapDispatchToProps = (dispatch: Dispatch<actions.IToggleHitWall>) => ({
-    onToggle: () => dispatch(actions.toggleHitWall())
-});
+const mapDispatchToProps = {
+    onToggle: actions.toggleHitWall
+};
 
-const BorderWallSwitch = connect(mapStateToProps, mapDispatchToProps)(Switch);
-export default BorderWallSwitch;
+export default connect(mapStateToProps, mapDispatchToProps)(Switch);

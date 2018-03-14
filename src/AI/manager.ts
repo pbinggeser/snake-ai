@@ -106,7 +106,7 @@ class Manager {
   private async tick() {
     if (!this.started || this.paused) { return; }
 
-    const sleepTime = this.config.gameSpeedUp === true ? 1 : 50;    
+    const sleepTime = this.config.highSpeedReducer.value === true ? 1 : 50;    
     await sleep(sleepTime);
     const that = this;
     let hasEveryoneDied = true;

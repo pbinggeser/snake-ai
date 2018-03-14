@@ -5,13 +5,13 @@ import { IStoreState } from '../types';
 
 const mapStateToProps = (state: IStoreState) => {
     return {
-        label: state.eatSelfReducer.label,
-        value: state.eatSelfReducer.value
+        label: state.highSpeedReducer.label,
+        value: state.highSpeedReducer.value
     };
 };
 
 const mapDispatchToProps = {
-    onToggle: actions.toggleEatSelf
+    onToggle: actions.toggleHighSpeed
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Switch);
