@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import { IStoreState } from '../types';
 
 const mapStateToProps = (state: IStoreState) => {
-    const s = state.updatePopulationReducer;
+    const s = state.populationReducer;
     return {
         name: s.name,
         value: s.value,

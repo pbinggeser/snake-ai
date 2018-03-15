@@ -24,7 +24,7 @@ const mapStateToProps = (state: IStoreState) => {
 };
 
 const mapDispatchToProps = {
-    onChangeEvent: actions.updateElitismPercent
+    onChangeEvent: actions.updateElitismPercentField
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Field);

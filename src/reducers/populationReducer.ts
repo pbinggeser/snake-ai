@@ -15,8 +15,8 @@ const updatePopulationStateIsRunning = (state: IFieldState) => {
     return newState;
 };
 
-const updatePopulationReducer = (state: IFieldState = initialState.updatePopulationReducer, 
-                                 action: populationActions): IFieldState => {
+const populationReducer = (state: IFieldState = initialState.populationReducer, 
+                           action: populationActions): IFieldState => {
     switch (action.type) {
         case constants.UPDATE_POPULATION_FIELD:
             return updatePopulationValue(state, action);
@@ -26,4 +26,4 @@ const updatePopulationReducer = (state: IFieldState = initialState.updatePopulat
     return state;
 };
 
-export default updatePopulationReducer;
+export default populationReducer;

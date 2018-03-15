@@ -3,7 +3,6 @@ import ReactDOM from 'react-dom';
 import { IStoreState } from './types/index';
 import { Provider } from 'react-redux';
 import Manager from './AI/manager';
-import Field from './components/Field';
 import './styles/App.css';
 import configureStore from './store/configureStore';
 
@@ -14,25 +13,35 @@ import HighSpeedSwitch from './containers/HighSpeedSwitch';
 import initialState from './reducers/initialState';
 import PopulationField from './containers/PopulationField';
 import ElitismPercentField from './containers/ElitismPercentField';
+import EatFoodScoreField from './containers/EatFoodScoreField';
+import MoveTowardsFoodScoreField from './containers/MoveTowardsFoodScoreField';
+import MoveAwayFoodScoreField from './containers/MoveAwayFoodScoreField';
+import SnakeStartingLengthField from './containers/SnakeStartingLengthField';
+import GridResolutionField from './containers/GridResolutionField';
+import DisplaySizeField from './containers/DisplaySizeField';
 
 const configuredStore = configureStore(initialState);
+
 class App extends Component<{}, IStoreState> {
     manager: Manager;
+    unsubscribe: any;
     constructor(props: any) {
       super(props);     
       this.state = initialState;
-      this.manager = new Manager(this.state);
+      this.manager = new Manager(configuredStore.getState());
       this.start = this.start.bind(this);
       this.pause = this.pause.bind(this);
       this.resume = this.resume.bind(this);
       this.stop = this.stop.bind(this);
+      this.unsubscribe = configuredStore.subscribe(this.changeSubscription(this.manager));
     }
-  
+    changeSubscription = (manager: Manager) => () => {
+      const newState = configuredStore.getState();
+      manager.updateSettings(newState);
+    }
     start() {
-      this.setState({
-        running: true
-      });
-      this.manager.updateSettings(this.state);
+      this.setState({ running: true });
+      // this.manager.updateSettings(configuredStore);
       this.manager.start();
     }
   
@@ -57,11 +66,12 @@ class App extends Component<{}, IStoreState> {
       this.manager.resume();
     }
   
-    render() {
-      var that = this;  
-      this.manager.updateSettings(this.state);  
+    render() { 
+      // this.manager.updateSettings(configuredStore);  
       var canvases = [];
-      for (var i = 0; i < this.state.populationSize; i++) {
+      const populationSize = configuredStore.getState().populationReducer.value;
+      const displaySize = configuredStore.getState().displaySizeReducer.value;
+      for (var i = 0; i < populationSize; i++) {
         canvases.push(i);
       }
   
@@ -100,97 +110,12 @@ class App extends Component<{}, IStoreState> {
               )}
             <PopulationField />
             <ElitismPercentField />
-            {/* <Field
-              type="number"
-              name="elitismPercent"
-              placeholder="Elitism Percent"
-              required={true}
-              value={this.state.elitismPercent}
-              // onChangeEvent={v => {
-              //   that.setState({ elitismPercent: v });
-              // }}
-              disabled={this.state.running}
-              description="% of top performers to use for the next generation."
-              min={1}
-              max={100}
-              step={1}
-            /> */}
-            <Field
-              type="number"
-              name="foodScore"
-              placeholder="Eat Food Score"
-              required={true}
-              value={this.state.foodScore}
-              // onChangeEvent={v => {
-              //   that.setState({ foodScore: v });
-              // }}
-              description="Awarded for eating food."
-              step={1}
-            />
-            <Field
-              type="number"
-              name="moveTowardsScore"
-              placeholder="Move Towards Food Score"
-              required={true}
-              value={this.state.moveTowardsScore}
-              // onChangeEvent={v => {
-              //   that.setState({ moveTowardsScore: v });
-              // }}
-              description="Awarded for each step towards food."
-              step={0.5}
-            />
-            <Field
-              type="number"
-              name="moveAwayScore"
-              placeholder="Move Away Food Score"
-              required={true}
-              value={this.state.moveAwayScore}
-              // onChangeEvent={v => {
-              //   that.setState({ moveAwayScore: v });
-              // }}
-              description="Awarded for each step away from food."
-              step={0.5}
-            />
-            <Field
-              type="number"
-              name="initialSnakeLength"
-              placeholder="Snake Starting Length"
-              required={true}
-              value={this.state.initialSnakeLength}
-              // onChangeEvent={v => {
-              //   that.setState({ initialSnakeLength: v });
-              // }}
-              description="Measured in grid cells."
-              min={1}
-              step={1}
-              max={Math.floor(this.state.gridResolution / 2)}
-            />
-            <Field
-              type="number"
-              name="gridResolution"
-              placeholder="Grid Resolution"
-              required={true}
-              value={this.state.gridResolution}
-              // onChangeEvent={v => {
-              //   that.setState({ gridResolution: v });
-              // }}
-              description="Resolution of each Snake's grid environment."
-              min={5}
-              step={1}
-            />
-            <Field
-              type="number"
-              name="displaySize"
-              placeholder="Display Size"
-              required={true}
-              value={this.state.displaySize}
-              // onChangeEvent={v => {
-              //   that.setState({ displaySize: v });
-              // }}
-              description="Does not affect game-play."
-              min={10}
-              step={1}
-            />
+            <EatFoodScoreField />
+            <MoveTowardsFoodScoreField />
+            <MoveAwayFoodScoreField />
+            <SnakeStartingLengthField />
+            <GridResolutionField />
+            <DisplaySizeField />            
             <BorderWallSwitch />
             <EatSelfSwitch />
             <GrowWhenEatingSwitch/>
@@ -212,8 +137,8 @@ class App extends Component<{}, IStoreState> {
                   <div className="grid-item" key={j}>
                     <canvas
                       id={'snake-canvas-' + j}
-                      width={that.state.displaySize + 'px'}
-                      height={that.state.displaySize + 'px'}
+                      width={displaySize + 'px'}
+                      height={displaySize + 'px'}
                     />
                   </div>
                 );

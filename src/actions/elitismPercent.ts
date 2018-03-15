@@ -5,7 +5,7 @@ export interface IUpdateElitismPercent {
     payload: number;
 }
 
-export const updateElitismPercent = (value: number): IUpdateElitismPercent => ({
+export const updateElitismPercentField = (value: number): IUpdateElitismPercent => ({
     type: constants.UPDATE_ELITISM_PERCENT_FIELD,
     payload: value
 });

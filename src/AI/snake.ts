@@ -48,13 +48,20 @@ class Snake {
   turnAngle: number;
   lastDirection?: number;
   lastDistance: number;
-  state: any;
-  config: IStoreState;
+  state: any;  
   brain: IBrain;
   canvasContext: CanvasRenderingContext2D;
-  
+  displaySize: number;
+  gridResolution: number;
+  foodScore: number;
+  moveTowardsFoodScore: number;
+  moveAwayFoodScore: number;
+  initialSnakeLength: number;
+  private config: IStoreState;
+
+  // tslint:disable-next-line:member-ordering
   constructor(brain: any, config: IStoreState, index: number) {
-    this.state = {};
+    this.state = {};    
     this.config = config;
     this.brain = brain;
     this.key = '';
@@ -67,29 +74,35 @@ class Snake {
     this.index = index;
     this.highScore = 0;
     this.gamesPlayed = -1;
-    
+
+    this.cacheSettings();
+
     this.restart();
     this.direction = 0;
     this.turnAngle = 90;
     this.makeFood();
     this.lastDirection = undefined;
-    this.lastDistance = this.config.gridResolution;
     this.canvasContext = (<HTMLCanvasElement> document.getElementById(`snake-canvas-${this.index}`)).getContext('2d')!;
   }
 
+  updateSettings(config: IStoreState) {
+    this.config = config;
+    this.cacheSettings();
+  }
+  
   hideCanvas() {
     this.canvasContext.fillStyle = 'rgba(255,255,255,.75)';
-    this.canvasContext.fillRect(0, 0, this.config.displaySize, this.config.displaySize);
+    this.canvasContext.fillRect(0, 0, this.displaySize, this.displaySize);
   }
 
   bragCanvas() {
     this.canvasContext.strokeStyle = '#3aa3e3';
     this.canvasContext.lineWidth = 4;
-    this.canvasContext.strokeRect(0, 0, this.config.displaySize, this.config.displaySize);
+    this.canvasContext.strokeRect(0, 0, this.displaySize, this.displaySize);
   }
 
   showCanvas() {
-    this.canvasContext.clearRect(0, 0, this.config.displaySize, this.config.displaySize);   
+    this.canvasContext.clearRect(0, 0, this.displaySize, this.displaySize);   
     this.drawSnakeOnCanvas();
     this.drawFoodOnCanvas();
     this.drawScoreOnCanvas();
@@ -104,17 +117,17 @@ class Snake {
     this.setNewSnakeHead(head, this.direction);
 
     if (this.config.hitWallReducer.value) {
-      if (head.x < 0 || head.x >= this.config.gridResolution) {
+      if (head.x < 0 || head.x >= this.gridResolution) {
         died = true;
       }
-      if (head.y < 0 || head.y >= this.config.gridResolution) {
+      if (head.y < 0 || head.y >= this.gridResolution) {
         died = true;
       }
     } else {
-      if (head.x < 0) { head.x = this.config.gridResolution - 1; } // head.x = 0;
-      if (head.x >= this.config.gridResolution) { head.x = 0; } // head.x = this.config.gridResolution - 1;
-      if (head.y < 0) { head.y = this.config.gridResolution - 1; }
-      if (head.y >= this.config.gridResolution) { head.y = 0; }
+      if (head.x < 0) { head.x = this.gridResolution - 1; } // head.x = 0;
+      if (head.x >= this.gridResolution) { head.x = 0; } // head.x = this.gridResolution - 1;
+      if (head.y < 0) { head.y = this.gridResolution - 1; }
+      if (head.y >= this.gridResolution) { head.y = 0; }
     }
 
     // snakes hit themselves
@@ -133,8 +146,8 @@ class Snake {
       // ate food
       if (head.x === this.state.food.x && head.y === this.state.food.y) {
         eating = true;
-        this.currentScore += this.config.foodScore;
-        this.lastDistance = this.config.gridResolution * 2;
+        this.currentScore += this.foodScore;
+        this.lastDistance = this.gridResolution * 2;
       }
       // add 1 square to the "front" of the snake
       this.state.body.unshift(head);
@@ -145,9 +158,9 @@ class Snake {
       // calculate whether snake is moving towards/away from food
       const d = distance(head.x, head.y, this.state.food.x, this.state.food.y);
       if (d < this.lastDistance) {
-        this.currentScore += this.config.moveTowardsScore;
+        this.currentScore += this.moveTowardsFoodScore;
       } else {
-        this.currentScore += this.config.moveAwayScore;
+        this.currentScore += this.moveAwayFoodScore;
       }
       this.lastDistance = d;
     }
@@ -215,21 +228,6 @@ class Snake {
     const up = {
       x: 0, y: 1
     };
-
-    // is this a buggy implementation? seems like the checks are wrong
-    // if (this.direction === 0) {
-    //   // up
-    //   this.checks = [left, down, right]; // , {x: -1, y: -1}, {x: 1, y: -1} ];
-    // } else if (this.direction === 90) {
-    //   // left
-    //   this.checks = [up, left, down]; // , {x: -1, y: -1}, {x: -1, y: 1} ];
-    // } else if (this.direction === 270) {
-    //   // right
-    //   this.checks = [down, right, up]; // , {x: 1, y: -1}, {x: 1, y: 1} ];
-    // } else if (this.direction === 180) {
-    //   // down
-    //   this.checks = [right, up, left]; // , {x: -1, y: 1}, {x: 1, y: 1} ];
-    // }
     if (this.direction === 0) {
       // up
       this.checks = [left, down, right]; // , {x: -1, y: -1}, {x: 1, y: -1} ];
@@ -248,13 +246,13 @@ class Snake {
       const tx = check.x + head.x;
       const ty = check.y + head.y;
      
-      if (tx < 0 || tx >= this.config.gridResolution) {
+      if (tx < 0 || tx >= this.gridResolution) {
         data.push(1);
         check.hit = true;
         return;
       }
 
-      if (ty < 0 || ty >= this.config.gridResolution) {
+      if (ty < 0 || ty >= this.gridResolution) {
         data.push(1);
         check.hit = true;
         return;
@@ -280,16 +278,25 @@ class Snake {
     this.data = data;
   }
   
+  private cacheSettings() {
+    this.displaySize = atoi(this.config.displaySizeReducer.value);
+    this.gridResolution = atoi(this.config.gridResolutionReducer.value);
+    this.foodScore = atoi(this.config.eatFoodScoreReducer.value);
+    this.moveTowardsFoodScore = atoi(this.config.moveTowardsFoodScoreReducer.value);
+    this.moveAwayFoodScore = atoi(this.config.moveAwayFoodScoreReducer.value);
+    this.initialSnakeLength = atoi(this.config.snakeStartingLengthReducer.value);
+  }
+
   private paintSnakeRed() {
     this.canvasContext.clearRect(0, 0, 100, 100);
     this.canvasContext.fillStyle = 'rgba(255,0,0,.5)';
     Object.keys(this.state.body).forEach(i => {
       const d = this.state.body[i];
       this.canvasContext.fillRect(
-        d.x / this.config.gridResolution * 100,
-        d.y / this.config.gridResolution * 100,
-        100 / this.config.gridResolution,
-        100 / this.config.gridResolution
+        d.x / this.gridResolution * 100,
+        d.y / this.gridResolution * 100,
+        100 / this.gridResolution,
+        100 / this.gridResolution
       );
     });
   }
@@ -307,7 +314,6 @@ class Snake {
   }
 
   private getBestDirectionFromNN(): void {
-    // let direction: number = 0;
     const moveOdds = this.brain.activate(this.data);
     const bestDirection = moveOdds.indexOf(Math.max(...moveOdds));
     
@@ -335,8 +341,8 @@ class Snake {
     let food;
     while (food === undefined) {
       const tfood = {
-        x: atoi(this.config.gridResolution * Math.random()),
-        y: atoi(this.config.gridResolution * Math.random())
+        x: atoi(this.gridResolution * Math.random()),
+        y: atoi(this.gridResolution * Math.random())
       };
       let found = false;
       for (const i in this.state.body) {
@@ -353,22 +359,22 @@ class Snake {
   private restart() {
     const body = [];
     const rows = [];
-    const halfGridResolution = this.config.gridResolution / 2; // cache this
+    const halfGridResolution = atoi(this.gridResolution / 2); // cache this
     // the plane for the snake (should this be run during construction?)
-    for (let x = 0; x < this.config.gridResolution; x++) {
+    for (let x = 0; x < this.gridResolution; x++) {
       const d = [];
-      for (let y = 0; y < this.config.gridResolution; y++) {
+      for (let y = 0; y < this.gridResolution; y++) {
         d.push({ x, y });
       }
       rows.push(d);
     }
 
     // the head
-    body.push({x: atoi(halfGridResolution), y: atoi(halfGridResolution)});
+    body.push({x: halfGridResolution, y: halfGridResolution});
 
     // the tail (configurable)
-    for (let i = 1; i < this.config.initialSnakeLength; i++) {
-      body.push({ x: atoi(halfGridResolution), y: atoi(halfGridResolution) + i});
+    for (let i = 1; i < this.initialSnakeLength; i++) {
+      body.push({ x: halfGridResolution, y: halfGridResolution + i});
     }
 
     this.state = { rows, body, food: { x: -1, y: -1 } };
@@ -376,7 +382,7 @@ class Snake {
     this.direction = 0;
     this.gamesPlayed++;
     this.lastDirection = undefined;
-    this.lastDistance = this.config.gridResolution;
+    this.lastDistance = this.gridResolution;
   }
 
   private drawSnakeOnCanvas() {
@@ -387,10 +393,10 @@ class Snake {
         (this.state.body.length) / this.state.body.length / 2 + 0.5;
       const d = this.state.body[i];
       this.canvasContext.fillRect(
-        d.x / this.config.gridResolution * this.config.displaySize,
-        d.y / this.config.gridResolution * this.config.displaySize, 
-        this.config.displaySize / this.config.gridResolution, 
-        this.config.displaySize / this.config.gridResolution);
+        d.x / this.gridResolution * this.displaySize,
+        d.y / this.gridResolution * this.displaySize, 
+        this.displaySize / this.gridResolution, 
+        this.displaySize / this.gridResolution);
     });
   }
 
@@ -399,9 +405,9 @@ class Snake {
     this.canvasContext.fillStyle = '#2c4';
     this.canvasContext.beginPath();
     this.canvasContext.arc(
-      (this.state.food.x + 0.5) / this.config.gridResolution * this.config.displaySize, 
-      (this.state.food.y + 0.5) / this.config.gridResolution * this.config.displaySize, 
-      this.config.displaySize / this.config.gridResolution / 2, 
+      (this.state.food.x + 0.5) / this.gridResolution * this.displaySize, 
+      (this.state.food.y + 0.5) / this.gridResolution * this.displaySize, 
+      this.displaySize / this.gridResolution / 2, 
       0, 
       2 * Math.PI
     );

@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import { IStoreState } from '../types';
 
 const mapStateToProps = (state: IStoreState) => {
-    const s = state.updatePopulationReducer;
+    const s = state.moveAwayFoodScoreReducer;
     return {
         name: s.name,
         value: s.value,
@@ -24,7 +24,7 @@ const mapStateToProps = (state: IStoreState) => {
 };
 
 const mapDispatchToProps = {
-    onChangeEvent: actions.updatePopulationField,
+    onChangeEvent: actions.updateMoveAwayFoodScoreField,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Field);

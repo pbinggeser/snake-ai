@@ -11,7 +11,7 @@ const mapStateToProps = (state: IStoreState) => {
 };
 
 const mapDispatchToProps = {
-    onToggle: actions.toggleEatSelf
+    onToggle: actions.toggleGrowWhenEat
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Switch);

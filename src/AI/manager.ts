@@ -3,7 +3,6 @@ import * as d3 from 'd3';
 import * as cola from 'webcola';
 import { calculateQ, sleep, atoi } from './utilities';
 import { IStoreState } from '../types';
-
 const neataptic = require('neataptic');
 const { Neat, architect, methods } = neataptic;
 
@@ -28,9 +27,11 @@ class Manager {
   generationTimeLog: any;
   iterationCounter: number;
   mutationRate: number;
-  inputSize: number;
-  startHiddenSize: number;
-  outputSize: number;
+  inputLayerSize: number;
+  hiddenLayerSize: number;
+  outputLayerSize: number;
+  subscriber: any;
+
   constructor(config: IStoreState) {
     this.started = false;
     this.paused = false;
@@ -39,15 +40,14 @@ class Manager {
     this.generationLog = [];
     this.generationTimeLog = [];
     this.iterationCounter = 0;
-    this.inputSize = 6;
-    this.startHiddenSize = 1;
-    this.outputSize = 3;
+    this.inputLayerSize = 6;
+    this.hiddenLayerSize = 1;
+    this.outputLayerSize = 3;
     this.mutationRate = 0.3;
   }
 
   start() {    
     this.initNN();
-
     this.neat.population.forEach((genome: any, i: number) => {
       this.snakes.push(new Snake(genome, this.config, i));
     });
@@ -72,15 +72,16 @@ class Manager {
     this.tick();
   }
 
-  updateSettings(newConfig: IStoreState) {
+  updateSettings(newConfig: IStoreState) {    
     this.config = newConfig;
     if (this.snakes) {
-      this.snakes.forEach(snake => Object.assign(snake.config, newConfig));
+      this.snakes.forEach(snake => snake.updateSettings(newConfig));
     }
   }
 
   private initNN() {
-    this.neat = new Neat(this.inputSize, this.outputSize, null, {
+    const elitismPercent = atoi(this.config.elitismPercentReducer.value);
+    this.neat = new Neat(this.inputLayerSize, this.outputLayerSize, null, {
       mutation: [
         methods.mutation.ADD_NODE,
         methods.mutation.SUB_NODE,
@@ -96,10 +97,10 @@ class Manager {
         methods.mutation.ADD_BACK_CONN,
         methods.mutation.SUB_BACK_CONN
       ],
-      popsize: this.config.populationSize,
+      popsize: this.config.populationReducer.value,
       murationRate: this.mutationRate,
-      elitism: Math.round(this.config.elitismPercent / 100 * this.config.populationSize),
-      network: new architect.Random(this.inputSize, this.startHiddenSize, this.outputSize)
+      elitism: Math.round(elitismPercent / 100 * atoi(this.config.populationReducer.value)),
+      network: new architect.Random(this.inputLayerSize, this.hiddenLayerSize, this.outputLayerSize)
     });
   }
 
@@ -127,7 +128,7 @@ class Manager {
         index: this.generationTimeLog.length
       });
       this.drawHistoryGraph();
-      setTimeout(() => { that.breed(); }, 1000);
+      setTimeout(() => { that.breed(); }, 200);
     } else {
       setTimeout(() => {
         this.snakes.forEach((snake, _j) => {
@@ -143,7 +144,7 @@ class Manager {
     let generationLog: IGenerationLogItem[] = [];
     clonedSnakes.forEach((clonedSnake: ISnake, j: number) => {
       let top = false;
-      if (j < this.config.populationSize * this.config.elitismPercent / 100) {
+      if (j < atoi(this.config.populationReducer.value) * atoi(this.config.elitismPercentReducer.value) / 100) {
         this.snakes[clonedSnake.index].bragCanvas();
         top = true;
       } else {

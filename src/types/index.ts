@@ -1,23 +1,21 @@
 import Snake from '../AI/snake';
 
 export interface IStoreState {
-    populationSize: number;
-    elitismPercent: number;
-    initialSnakeLength: number; 
-    displaySize: number;
-    gridResolution: number;
     running: boolean;
     paused: boolean;
-    moveTowardsScore: number;
-    moveAwayScore: number;
-    foodScore: number;  
     snakes: Snake[];
     hitWallReducer: ISwitchState;
     eatSelfReducer: ISwitchState;
     growWhenEatReducer: ISwitchState;
     highSpeedReducer: ISwitchState;
-    updatePopulationReducer: IFieldState;
-    elitismPercentReducer: IFieldState;
+    populationReducer: IFieldState;
+    elitismPercentReducer: IFieldState;    
+    displaySizeReducer: IFieldState;
+    eatFoodScoreReducer: IFieldState;
+    gridResolutionReducer: IFieldState;
+    moveAwayFoodScoreReducer: IFieldState;
+    moveTowardsFoodScoreReducer: IFieldState;
+    snakeStartingLengthReducer: IFieldState;
 }
 
 export interface ISwitchState {
